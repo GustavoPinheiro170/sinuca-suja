@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Sinuca Suja</title>
+<meta name="description" content="Sinuca 3D num bar caindo aos pedaços: qualquer objeto do cenário vira taco.">
+<meta property="og:title" content="Sinuca Suja">
+<meta property="og:description" content="Sinuca 3D num bar caindo aos pedaços. Qualquer objeto vira taco.">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="estilo.css">
+
+<!-- Bibliotecas via CDN. Nenhum passo de build: React sem JSX (React.createElement),
+     Three.js na build UMD clássica. Trocar por arquivos locais se quiser rodar offline. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+<div id="gl"></div>
+<div id="root"></div>
+
+<script src="src/01-base.js"></script>
+<script src="src/02-texturas.js"></script>
+<script src="src/03-materiais.js"></script>
+<script src="src/04-objetos.js"></script>
+<script src="src/05-gente.js"></script>
+<script src="src/06-cena.js"></script>
+<script src="src/07-estado.js"></script>
+<script src="src/08-fisica.js"></script>
+<script src="src/09-loop.js"></script>
+<script src="src/10-ui.js"></script>
+
+</body>
+</html>

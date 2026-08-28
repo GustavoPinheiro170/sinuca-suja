@@ -1,6 +1,5 @@
 /* Sinuca Suja — Atendente e bêbado: modelo, animação e raiva
-   Sem bundler: este arquivo é carregado direto por <script> no index.html,
-   na ordem definida lá. Tudo compartilha o escopo global. */
+   Sem bundler: carregado por <script> no index.html, na ordem definida lá. */
 
 /* ══ GENTE ══ */
 var NPCS=[],npcMeshes=[];
@@ -80,7 +79,7 @@ function makePerson(cfg){
 }
 function angerNPC(n,o){
   if(n.anger>0)return;
-  n.anger=3.0;
+  n.anger=3.0;Som.raiva();
   var L=n.cfg.lines;
   toast(L[Math.floor(Math.random()*L.length)],n.cfg.nome+" se levantou","bad");
   if(o)n.back={obj:o,t:1.15};

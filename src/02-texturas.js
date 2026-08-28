@@ -1,6 +1,5 @@
 /* Sinuca Suja — Texturas desenhadas em canvas + helpers de geometria
-   Sem bundler: este arquivo é carregado direto por <script> no index.html,
-   na ordem definida lá. Tudo compartilha o escopo global. */
+   Sem bundler: carregado por <script> no index.html, na ordem definida lá. */
 
 /* ══ TEXTURAS PROCEDURAIS ══ */
 function cvs(w,ht){var c=document.createElement("canvas");c.width=w;c.height=ht;return c;}

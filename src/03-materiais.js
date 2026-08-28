@@ -1,6 +1,5 @@
 /* Sinuca Suja — Materiais PBR
-   Sem bundler: este arquivo é carregado direto por <script> no index.html,
-   na ordem definida lá. Tudo compartilha o escopo global. */
+   Sem bundler: carregado por <script> no index.html, na ordem definida lá. */
 
 /* ══ MATERIAIS ══ */
 var MAT={};

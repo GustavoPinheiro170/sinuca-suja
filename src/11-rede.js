@@ -140,12 +140,13 @@ function receber(m){
     var ob=OBJECTS.filter(function(x){return x.id===m.obj;})[0];
     if(ob)equipFoe(ob);
     G.turn="foe"; G.phase="aim";
-    shoot({x:m.dx,z:m.dz},m.p,"foe");
+    shoot({x:m.dx,z:m.dz},m.p,"foe",
+      (typeof m.vx==="number")?{vx:m.vx,vz:m.vz}:null);
     return;
   }
   if(m.t==="arremesso"){
     var j=junkPool[m.j];
-    if(j)hurl(j,m.x,0.075,m.z);
+    if(j)hurl(j,m.x,0.075,m.z,m.sem);
     return;
   }
   if(m.t==="retirar"){
@@ -159,18 +160,24 @@ function receber(m){
     }
     return;
   }
-  if(m.t==="estado"){ aplicarSnap(m.s); return; }
+  if(m.t==="estado"){
+    /* Não corta a rolagem no meio: guarda e encaixa quando as bolas param. */
+    if(m.auto&&G.phase==="roll"){ snapPend=m.s; return; }
+    aplicarSnap(m.s,!!m.auto); return;
+  }
   if(m.t==="pedeEstado"){ Rede.enviar({t:"estado",s:tirarSnap()}); return; }
 }
 /* ── sincronização depois de uma queda ── */
+var snapPend=null;
 function tirarSnap(){
   return {sem:_sem,turn:G.turn,phase:G.phase,group:G.group,foeGroup:G.foeGroup,
+    over:G.over?1:0,winner:G.winner,
     shots:G.shots,thr:G.throwsLeft,
     b:G.balls.map(function(b){return [b.x,b.z,b.live?1:0,b.num];}),
     j:junkPool.map(function(o){return [o.x,o.y,o.z,o.q.x,o.q.y,o.q.z,o.q.w,
       o.state,o.onTable?1:0];})};
 }
-function aplicarSnap(s){
+function aplicarSnap(s,quieto){
   if(!s||!G)return;
   _sem=s.sem;
   /* o snapshot vem do anfitrião, cujo "you" é o meu "foe" */
@@ -181,12 +188,24 @@ function aplicarSnap(s){
   s.b.forEach(function(v,i){ var b=G.balls[i]; if(!b)return;
     b.x=v[0];b.z=v[1];b.live=!!v[2];b.num=v[3];b.vx=0;b.vz=0; });
   s.j.forEach(function(v,i){ var o=junkPool[i]; if(!o)return;
+    /* tralha na mão (minha ou dele) não entra no encaixe: a jogada dela ainda
+       nem aconteceu, e o arremesso chega na mensagem própria */
+    if(o.state==="held"||v[7]==="held")return;
     o.x=v[0];o.y=v[1];o.z=v[2];
     o.q.set(v[3],v[4],v[5],v[6]);
-    o.state=v[7];o.onTable=!!v[8];o.vx=0;o.vz=0;o.av.set(0,0,0);
+    o.state=(v[7]==="fly")?"rest":v[7];
+    o.onTable=!!v[8];o.vx=0;o.vy=0;o.vz=0;o.av.set(0,0,0);
+    if(o.state==="rest"&&!o.onTable)o.y=FLOOR+restY(o);
     o.g.position.set(o.x,o.y,o.z);o.g.quaternion.copy(o.q); });
+  if(s.over){
+    G.over=true;G.phase="over";
+    G.winner=(s.winner==="you")?"foe":"you";
+    ui({over:true,winner:G.winner,shots:G.shots,group:G.group});
+    return;
+  }
+  G.over=false;
   sync();
-  toast("Sincronizado","a partida continua","good");
+  if(!quieto)toast("Sincronizado","a partida continua","good");
 }
 function iniciarOnline(semente){
   semear(semente);

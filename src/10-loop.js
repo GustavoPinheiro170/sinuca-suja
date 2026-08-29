@@ -58,6 +58,20 @@ function updateHover(){
     if(ow.kind==="junk"&&canThrow&&ow.obj.state==="idle"&&!ow.obj.onTable){
       hovered={kind:"junk",obj:ow.obj};return;}}
 }
+/* Uma porta só para cada ação de rede: simula primeiro, avisa depois com o
+   resultado exato. Assim o teste automatizado percorre o mesmo caminho do
+   jogador de verdade, sem uma segunda cópia da lógica para sair de sincronia. */
+function tacar(dir,pw){
+  shoot(dir,pw,"you");
+  if(G.modo==="online")Rede.enviar({t:"tacada",dx:dir.x,dz:dir.z,p:pw,obj:G.obj.id,
+    vx:G.balls[0].vx,vz:G.balls[0].vz});
+}
+function arremessar(jo,at){
+  var jIdx=junkPool.indexOf(jo);
+  if(!hurl(jo,at.x,at.y,at.z))return false;
+  if(G.modo==="online")Rede.enviar({t:"arremesso",j:jIdx,x:at.x,z:at.z,sem:jo.sem});
+  return true;
+}
 function frame(ts){
   requestAnimationFrame(frame);
   if(!prev)prev=ts;
@@ -74,11 +88,13 @@ function frame(ts){
   while(acumul>=DT_FIXO&&nPassos<40){
     if(G.phase==="roll")stepBalls(DT_FIXO);
     stepJunk(DT_FIXO);
+    /* Dentro do laço de propósito: testado uma vez por quadro, uma máquina a
+       50fps encerrava a jogada num instante simulado diferente de outra a
+       144fps — e endTurn zera velocidades e pode repor a branca. */
+    if(G.phase==="roll"&&!moving())endTurn();
     acumul-=DT_FIXO; nPassos++;
   }
-  if(G.phase==="roll"){
-    if(!moving())endTurn();
-  }else{
+  if(G.phase!=="roll"){
     if(G.phase==="foe-pick"){
       G.anim-=dt;
       if(G.anim<=0){
@@ -230,9 +246,8 @@ addEventListener("pointerdown",function(e){
     setCursor();return;}
   if(!G||G.over)return;
   if(G.held){
-    var at=throwAim(),jIdx=junkPool.indexOf(G.held);
-    if(at&&hurl(G.held,at.x,at.y,at.z)){
-      if(G.modo==="online")Rede.enviar({t:"arremesso",j:jIdx,x:at.x,z:at.z});
+    var at=throwAim(),jo=G.held;
+    if(at&&arremessar(jo,at)){
       G.throwsLeft--;
       toast(at.npc?"Mirou em gente":"Arremessou",
         at.npc?"isso não vai acabar bem":G.throwsLeft+" restantes",at.npc?"bad":"cold");
@@ -301,8 +316,7 @@ function endPtr(e){
   if(d&&G.phase==="aim"){
     if(G.power<0.045)toast("Tacada cancelada","puxe o taco para trás para dar força","cold");
     else{
-      if(G.modo==="online")Rede.enviar({t:"tacada",dx:d.x,dz:d.z,p:G.power,obj:G.obj.id});
-      shoot(d,G.power,"you");}}
+      tacar(d,G.power);}}
   G.power=0;G.aimLock=null;
 }
 addEventListener("pointerup",endPtr);

@@ -62,8 +62,9 @@ function stepJunk(dt){
         if(ddx*ddx+ddz*ddz<0.085&&Math.abs(ddy)<0.44){
           o.state="rest";o.onTable=false;o.vx=o.vy=o.vz=0;o.av.set(0,0,0);
           o.y=FLOOR+restY(o);
-          o.x=np.root.position.x+(rnd()-0.5)*0.5;
-          o.z=np.root.position.z+0.42+rnd()*0.2;
+          var rj=o.rng||rnd;
+          o.x=np.root.position.x+(rj()-0.5)*0.5;
+          o.z=np.root.position.z+0.42+rj()*0.2;
           angerNPC(np,o);break;}}
       if(o.state!=="fly"){o.g.position.set(o.x,o.y,o.z);o.g.quaternion.copy(o.q);continue;}
       o.x+=o.vx*dt;o.z+=o.vz*dt;
@@ -79,7 +80,8 @@ function stepJunk(dt){
         if(Math.abs(o.vy)>(onT?1.05:0.60)){
           o.vy=-o.vy*soft;o.vx*=onT?0.16:0.50;o.vz*=onT?0.16:0.50;
           o.av.multiplyScalar(0.35);
-          o.av.x+=(rnd()-0.5)*3.0;o.av.z+=(rnd()-0.5)*3.0;
+          var rb=o.rng||rnd;
+          o.av.x+=(rb()-0.5)*3.0;o.av.z+=(rb()-0.5)*3.0;
         }else{
           o.vy=0;o.av.set(0,0,0);o.state="rest";o.onTable=onT;
           o.y=(onT?0:FLOOR)+restY(o);
@@ -105,13 +107,20 @@ function solveThrow(sx,sy,sz,tx,ty,tz){
   var tUp=Math.sqrt(2*A/GACC),tDn=Math.sqrt(2*Math.max(0.02,A-dy)/GACC),T=tUp+tDn;
   return {T:T,vx:(tx-sx)/T,vz:(tz-sz)/T,vy:GACC*tUp};
 }
-function hurl(o,tx,ty,tz){
+function hurl(o,tx,ty,tz,sem){
   if(o.state==="fly")return false;
+  /* O tombo sorteia bastante (giro inicial e a cada quique). Antes isso saía
+     do sorteio compartilhado, e como a tralha voa no relógio de parede as duas
+     máquinas consumiam o fluxo em ordens diferentes: a tacada seguinte já
+     nascia com outro desvio. Agora cada arremesso leva a sua própria semente
+     na mensagem e não encosta no fluxo comum. */
+  o.sem=(sem>>>0)||((rnd()*4294967296)>>>0)||1;
+  o.rng=fluxo(o.sem);
   var sy=Math.max(o.y,FLOOR+0.42);o.y=sy;
   var sol=solveThrow(o.x,sy,o.z,tx,ty,tz);
   o.state="fly";o.onTable=false;o.held=false;
   o.vx=sol.vx;o.vy=sol.vy;o.vz=sol.vz;
-  o.av.set((rnd()-0.5)*15,(rnd()-0.5)*15,(rnd()-0.5)*15);
+  o.av.set((o.rng()-0.5)*15,(o.rng()-0.5)*15,(o.rng()-0.5)*15);
   return true;
 }
 /* mira do arremesso: pessoa sob o cursor, senão o pano */
@@ -139,13 +148,20 @@ function tableTarget(){
     if(ok)return {x:x,z:z};}
   return {x:(rnd()*2-1)*HW*0.6,z:(rnd()*2-1)*HL*0.6};
 }
-function shoot(dir,power,who){
+function shoot(dir,power,who,vel){
   var cue=G.balls[0];if(!cue.live)return;
   var an=(who==="you"?G.obj:G.foeObj).an;
-  var dev=(1-an.precisao)*0.34*(0.35+0.65*power)*(1.45-an.controle);
-  var ang=Math.atan2(dir.z,dir.x)+(rnd()-0.5)*2*dev;
-  var v=(0.30+0.70*power)*(2.1+an.potencia*4.6);
-  cue.vx=Math.cos(ang)*v;cue.vz=Math.sin(ang)*v;
+  if(vel){
+    /* Online: a velocidade vem pronta de quem tacou. Recalcular aqui dependia
+       do fluxo de sorteio estar no mesmo ponto dos dois lados — e bastava um
+       quique de tralha a mais para as duas mesas saírem diferentes. */
+    cue.vx=vel.vx;cue.vz=vel.vz;
+  }else{
+    var dev=(1-an.precisao)*0.34*(0.35+0.65*power)*(1.45-an.controle);
+    var ang=Math.atan2(dir.z,dir.x)+(rnd()-0.5)*2*dev;
+    var v=(0.30+0.70*power)*(2.1+an.potencia*4.6);
+    cue.vx=Math.cos(ang)*v;cue.vz=Math.sin(ang)*v;
+  }
   Som.tacada(power,(who==="you"?G.obj:G.foeObj).id);
   G.potted=[];G.foul=false;G.phase="roll";G.shots++;
 }
@@ -222,7 +238,18 @@ function respot(){
     if(!bad)return;
     c.x=(rnd()*2-1)*HW*0.72;c.z=HL*(0.25+rnd()*0.42);}
 }
+/* Quem tacou é a autoridade daquela jogada: no fim ele manda a mesa inteira e
+   o outro lado encaixa. É o que fecha qualquer diferença que tenha nascido de
+   uma tralha arremessada no meio da rolagem, que chega em instantes simulados
+   diferentes nas duas máquinas. */
 function endTurn(){
+  var quem=G.turn;
+  fecharJogada();
+  if(G.modo!=="online")return;
+  if(quem==="you"){ Rede.enviar({t:"estado",auto:1,s:tirarSnap()}); }
+  else if(snapPend){ var sp=snapPend; snapPend=null; aplicarSnap(sp,true); }
+}
+function fecharJogada(){
   G.balls.forEach(function(b){b.vx=0;b.vz=0;});
   junkPool.forEach(function(o){if(o.onTable){o.vx=0;o.vz=0;}});
   var who=G.turn,potted=G.potted.slice(),foul=G.foul;

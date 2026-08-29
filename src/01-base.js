@@ -15,6 +15,19 @@ function rnd(){
   t^=t+Math.imul(t^(t>>>7),t|61);
   return ((t^(t>>>14))>>>0)/4294967296;
 }
+/* Fluxo independente: cada tralha arremessada ganha o seu, semeado pelo
+   número que viaja na mensagem. Assim o tombo de uma bota nunca mexe no
+   sorteio compartilhado — era isso que desalinhava as tacadas seguintes. */
+function fluxo(s){
+  var e=(s>>>0)||1;
+  return function(){
+    e=(e+0x6D2B79F5)>>>0;
+    var t=e;
+    t=Math.imul(t^(t>>>15),t|1);
+    t^=t+Math.imul(t^(t>>>7),t|61);
+    return ((t^(t>>>14))>>>0)/4294967296;
+  };
+}
 var POCKETS=[{x:-HW,z:-HL},{x:HW,z:-HL},{x:-HW,z:0},{x:HW,z:0},{x:-HW,z:HL},{x:HW,z:HL}];
 var BCOL=["#E8B71E","#2660C4","#CF3227","#7B3FBF","#DE6F1B","#1F8F58","#7E2A33",
           "#15181D","#E8B71E","#2660C4","#CF3227","#7B3FBF","#DE6F1B","#1F8F58"];

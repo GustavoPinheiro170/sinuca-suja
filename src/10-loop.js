@@ -61,6 +61,13 @@ function updateHover(){
 /* Uma porta só para cada ação de rede: simula primeiro, avisa depois com o
    resultado exato. Assim o teste automatizado percorre o mesmo caminho do
    jogador de verdade, sem uma segunda cópia da lógica para sair de sincronia. */
+function recolher(ro,ang){
+  ro.state="idle";ro.onTable=false;ro.vx=0;ro.vy=0;ro.vz=0;ro.av.set(0,0,0);
+  ro.x=ro.home.x;ro.z=ro.home.z;
+  ro.q.setFromEuler(new THREE.Euler(0,ang,0));
+  ro.y=FLOOR+restY(ro);
+  ro.g.position.set(ro.x,ro.y,ro.z);ro.g.quaternion.copy(ro.q);
+}
 function tacar(dir,pw){
   shoot(dir,pw,"you");
   if(G.modo==="online")Rede.enviar({t:"tacada",dx:dir.x,dz:dir.z,p:pw,obj:G.obj.id,
@@ -227,12 +234,31 @@ function frame(ts){
 
 /* ══ ENTRADA ══ */
 var ptrs={},orbit={on:false,px:0,py:0},pinch=0;
+/* Desistir da tacada tem que ser sempre a MESMA coisa, venha de onde vier:
+   soltar na origem, botão direito, dois dedos, alt-tab ou um pointercancel do
+   navegador. Faltando isso, um "pointercancel" no meio do puxão caía no
+   endPtr e virava tacada de verdade — a vez passava, a mensagem ia para o
+   outro lado e a partida saía do lugar sem o jogador ter batido. */
+function cancelarTacada(aviso){
+  if(!G||!G.charging&&!G.aimLock&&!G.power)return false;
+  G.charging=false;G.power=0;G.aimLock=null;
+  if(aviso)toast("Tacada cancelada","o taco voltou para a origem","cold");
+  return true;
+}
 function setCursor(){
   var cl=renderer.domElement.classList;
   cl.remove("pick");cl.remove("orbit");
   if(orbit.on)cl.add("orbit");else if(hovered)cl.add("pick");
 }
-addEventListener("contextmenu",function(e){e.preventDefault();});
+/* Em vários navegadores o botão direito não gera pointerdown, só contextmenu.
+   Sem desistir aqui o "charging" sobrevivia, e o pointerup seguinte — o do
+   botão ESQUERDO, que o jogador solta em seguida — disparava a tacada que ele
+   tinha acabado de cancelar. */
+addEventListener("contextmenu",function(e){
+  e.preventDefault();
+  cancelarTacada(G&&G.charging&&G.power>=CANCELA);
+  setCursor();
+});
 addEventListener("pointerdown",function(e){
   Som.iniciar();
   if(e.target&&e.target.closest&&e.target.closest(".ui"))return;
@@ -242,7 +268,7 @@ addEventListener("pointerdown",function(e){
     orbit.on=true;orbit.px=e.clientX;orbit.py=e.clientY;
     if(n>=2){var k=Object.keys(ptrs);
       pinch=Math.hypot(ptrs[k[0]].x-ptrs[k[1]].x,ptrs[k[0]].y-ptrs[k[1]].y);}
-    if(G)G.charging=false;
+    cancelarTacada(G&&G.charging&&G.power>0.045);
     setCursor();return;}
   if(!G||G.over)return;
   if(G.held){
@@ -261,15 +287,17 @@ addEventListener("pointerdown",function(e){
       if(G.modo==="online")Rede.enviar({t:"taco",obj:o.id});
       toast("Pegou",o.nome.toLowerCase(),"good");sync();
     }else if(hovered.kind==="rm"){
-      var ro=hovered.obj;
-      ro.state="idle";ro.onTable=false;ro.vx=0;ro.vz=0;ro.av.set(0,0,0);
-      ro.x=ro.home.x;ro.z=ro.home.z;
-      ro.q.setFromEuler(new THREE.Euler(0,rnd()*TAU,0));
-      ro.y=FLOOR+restY(ro);
-      ro.g.position.set(ro.x,ro.y,ro.z);ro.g.quaternion.copy(ro.q);
-      if(G.modo==="online")Rede.enviar({t:"retirar",j:junkPool.indexOf(ro)});
+      var ro=hovered.obj,ang=rnd()*TAU;
+      recolher(ro,ang);
+      if(G.modo==="online")Rede.enviar({t:"retirar",j:junkPool.indexOf(ro),a:ang});
       toast("Tirou "+ro.t.nome.toLowerCase()+" da mesa","custou a sua vez","bad");
-      G.turn="foe";G.phase="foe-pick";G.anim=0.9;sync();
+      G.turn="foe";
+      /* Online quem joga é gente do outro lado: acordar a máquina de fases da
+         IA aqui fazia o meu lado inventar uma tacada que nunca existiu — e a
+         partida inteira saía do lugar a partir daí. */
+      if(G.modo==="online")G.phase="aguardando";
+      else{G.phase="foe-pick";G.anim=0.9;}
+      sync();
     }else if(hovered.kind==="junk"&&G.throwsLeft>0&&!G.held){
       var ob=hovered.obj;ob.state="held";ob.holdY=ob.y+0.55;G.held=ob;Som.pegar();
       toast("Pegou "+ob.t.nome.toLowerCase(),"mire e clique para arremessar","cold");sync();}
@@ -311,16 +339,27 @@ function endPtr(e){
   if(orbit.on){setCursor();return;}
   setCursor();
   if(!G||!G.charging)return;
-  G.charging=false;
-  var d=G.aimLock||aimDir();
-  if(d&&G.phase==="aim"){
-    if(G.power<0.045)toast("Tacada cancelada","puxe o taco para trás para dar força","cold");
-    else{
-      tacar(d,G.power);}}
-  G.power=0;G.aimLock=null;
+  if(e&&typeof e.button==="number"&&e.button>0){   /* direito/meio: desiste */
+    cancelarTacada(G.power>=CANCELA);setCursor();return;}
+  var d=G.aimLock||aimDir(),pw=G.power;
+  G.charging=false;G.power=0;G.aimLock=null;
+  if(!d||G.phase!=="aim")return;
+  if(pw<CANCELA){toast("Tacada cancelada","puxe o taco para trás para dar força","cold");return;}
+  tacar(d,pw);
 }
 addEventListener("pointerup",endPtr);
-addEventListener("pointercancel",endPtr);
+/* pointercancel NÃO é endPtr: o navegador dispara isso quando toma a gesto
+   para si (alt-tab, gesto do trackpad, toque virando rolagem) e aí o jogador
+   não bateu em nada. Antes isso tacava com a força que estivesse carregada. */
+addEventListener("pointercancel",function(e){
+  delete ptrs[e.pointerId];
+  if(Object.keys(ptrs).length<1){orbit.on=false;pinch=0;}
+  cancelarTacada(G&&G.charging&&G.power>CANCELA);setCursor();
+});
+/* sair da janela no meio do puxão também é desistir */
+addEventListener("blur",function(){ptrs={};orbit.on=false;pinch=0;cancelarTacada(false);setCursor();});
+document.addEventListener("visibilitychange",function(){
+  if(document.hidden){ptrs={};orbit.on=false;pinch=0;cancelarTacada(false);setCursor();}});
 addEventListener("keydown",function(e){
   if(e.key==="Escape"&&G&&G.held){
     G.held.state="idle";G.held.y=FLOOR+restY(G.held);G.held=null;

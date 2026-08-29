@@ -29,12 +29,14 @@ function Pips(p){
 function App(){
   var stt=React.useState({started:false,over:false,turn:"you",phase:"aim",group:null,shots:0,
     throwsLeft:3,live:[],sel:"taco",foeSel:"cadeira",toast:null,toastSub:"",toastKind:"good",
-    power:0,winner:null,hov:null,hx:0,hy:0,som:Som.ativo(),
+    power:0,charging:false,winner:null,hov:null,hx:0,hy:0,som:Som.ativo(),
     tela:"menu",modo:"ia",sala:null,rede:"off",redeMsg:"",codigo:""});
   var s=stt[0],set=stt[1];
   React.useEffect(function(){setUI=set;},[]);
   React.useEffect(function(){
-    var id=setInterval(function(){if(G)set(function(o){return Object.assign({},o,{power:G.power});});},50);
+    var id=setInterval(function(){if(G)set(function(o){
+      return (o.power===G.power&&o.charging===!!G.charging)?o
+        :Object.assign({},o,{power:G.power,charging:!!G.charging});});},50);
     return function(){clearInterval(id);};},[]);
   function start(){
     Som.iniciar();
@@ -127,8 +129,9 @@ function App(){
     : (s.turn==="foe"
       ? (throwing?"Clique numa tralha do bar":"Trapaceiro jogando")
       : (s.phase==="roll"?"Bolas rolando"
-        :(s.power>0.02?("Força "+Math.round(s.power*100)+"% · solte para bater")
-        :"Pressione e puxe o taco para trás")));
+        :(s.power>=0.06?("Força "+Math.round(s.power*100)+"% · solte para bater")
+        :(s.charging?"Taco na origem · solte para cancelar"
+        :"Pressione e puxe o taco para trás"))));
   var cur=OBJECTS.filter(function(o){return o.id===s.sel;})[0]||OBJECTS[0];
   var foeO=OBJECTS.filter(function(o){return o.id===s.foeSel;})[0];
   var hovObj=s.hov&&s.hov.k==="cue"?OBJECTS.filter(function(o){return o.id===s.hov.id;})[0]:null;

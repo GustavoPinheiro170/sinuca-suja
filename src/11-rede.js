@@ -152,9 +152,9 @@ function receber(m){
   if(m.t==="retirar"){
     var r=junkPool[m.j];
     if(r){
-      r.state="idle";r.onTable=false;r.vx=0;r.vz=0;r.av.set(0,0,0);
-      r.x=r.home.x;r.z=r.home.z;r.y=FLOOR+restY(r);
-      r.g.position.set(r.x,r.y,r.z);
+      /* o ângulo vem na mensagem: antes quem tirava sorteava um rnd() que o
+         outro lado não gastava, e os dois fluxos saíam de passo */
+      recolher(r,(typeof m.a==="number")?m.a:rnd()*TAU);
       G.turn="you";G.phase="aim";sync();
       toast("Ele tirou "+r.t.nome.toLowerCase(),"perdeu a vez dele","good");
     }

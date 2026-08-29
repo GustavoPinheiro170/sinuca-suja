@@ -4,18 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Sinuca Suja</title>
-<meta name="description" content="Sinuca 3D num bar caindo aos pedaços: qualquer objeto do cenário vira taco, e o adversário joga tralha na mesa.">
+<meta name="description" content="Sinuca 3D num bar caindo aos pedaços: qualquer objeto do cenário vira taco.">
 <meta property="og:title" content="Sinuca Suja">
 <meta property="og:description" content="Sinuca 3D num bar caindo aos pedaços. Qualquer objeto vira taco.">
-<meta property="og:type" content="website">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<style>html,body{margin:0;height:100%;background:#06080B;overscroll-behavior:none}</style>
-</head>
-<body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <style>
 :root{--night:#06080B;--panel:rgba(10,13,18,.9);--edge:rgba(217,164,65,.22);
   --brass:#D9A441;--ice:#7FD4E8;--hot:#FF6B3D;--bone:#F0E9DB;--dim:#7F8894}
@@ -31,6 +24,12 @@ body{margin:0;background:var(--night);color:var(--bone);
 .ui>*{pointer-events:auto}
 
 .top{position:absolute;top:0;left:0;right:0;display:flex;justify-content:center;padding:13px}
+.som{position:absolute;top:13px;right:14px;width:38px;height:38px;display:grid;place-items:center;
+  background:var(--panel);border:1px solid var(--edge);backdrop-filter:blur(12px);cursor:pointer;
+  color:var(--brass);font-family:"JetBrains Mono",monospace;font-size:15px;line-height:1;padding:0;
+  transition:color .15s,border-color .15s}
+.som:hover{border-color:var(--brass)}
+.som.off{color:#5B636E;border-color:rgba(255,255,255,.08)}
 .sb{display:flex;background:var(--panel);border:1px solid var(--edge);backdrop-filter:blur(12px)}
 .sd{padding:8px 18px;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:152px;transition:background .3s}
 .sd.on{background:rgba(217,164,65,.15)}
@@ -78,6 +77,33 @@ body{margin:0;background:var(--night);color:var(--bone);
 .pt.arm{color:var(--hot)}.pt.throw{color:var(--ice)}
 .pb{height:6px;width:100%;background:rgba(255,255,255,.07);border:1px solid var(--edge);position:relative}
 .pb i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--ice),var(--brass) 55%,var(--hot));transition:width .04s linear}
+.menu{display:flex;flex-direction:column;gap:9px;width:100%;max-width:330px;margin:0 auto}
+.op{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--bone);background:rgba(255,255,255,.05);
+  border:1px solid var(--edge);padding:14px 18px;cursor:pointer;text-align:left;
+  transition:background .15s,border-color .15s,transform .15s}
+.op:hover{background:rgba(217,164,65,.12);border-color:var(--brass);transform:translateX(3px)}
+.op b{display:block;font-size:12px;letter-spacing:.16em;color:var(--brass);margin-bottom:3px}
+.op span{display:block;font-size:9.5px;font-weight:400;letter-spacing:.06em;
+  text-transform:none;color:#96A1AE;line-height:1.5}
+.op.pri{background:rgba(217,164,65,.14);border-color:var(--brass)}
+.cod{font-family:"Archivo Black",sans-serif;font-size:2.6rem;letter-spacing:.22em;
+  color:var(--brass);margin:14px 0 6px;text-shadow:0 0 30px rgba(217,164,65,.3)}
+.campo{font-family:"Archivo Black",sans-serif;font-size:1.5rem;letter-spacing:.2em;
+  text-align:center;text-transform:uppercase;color:var(--brass);background:rgba(0,0,0,.4);
+  border:1px solid var(--edge);padding:12px;width:100%;outline:none}
+.campo:focus{border-color:var(--brass)}
+.stt{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;margin:14px 0 0}
+.stt.ok{color:#5BD08A}.stt.esp{color:var(--brass)}.stt.mal{color:var(--hot)}
+.volta{background:none;border:0;color:#7F8894;font-family:"JetBrains Mono",monospace;
+  font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;margin-top:16px}
+.volta:hover{color:var(--bone)}
+.conn{position:absolute;top:13px;left:14px;background:var(--panel);border:1px solid var(--edge);
+  backdrop-filter:blur(12px);padding:7px 11px;font-size:9px;letter-spacing:.15em;
+  text-transform:uppercase;color:#7F8894;display:flex;align-items:center;gap:7px}
+.conn i{width:7px;height:7px;border-radius:50%;background:#5BD08A;display:block}
+.conn.mal i{background:var(--hot)}
+.conn.mal{color:var(--hot);border-color:rgba(255,107,61,.4)}
 .hint{position:absolute;bottom:62px;left:50%;transform:translateX(-50%);font-size:8px;
   letter-spacing:.17em;text-transform:uppercase;color:#4E5763;text-align:center;white-space:nowrap}
 
@@ -106,18 +132,55 @@ h1 em{font-style:normal;color:var(--hot)}
 @media (prefers-reduced-motion:reduce){.btn{transition:none}.toast{animation:none}}
 </style>
 
+<!-- Sem passo de build. React sem JSX, Three.js na build UMD. Áudio 100% sintetizado. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"></script>
+</head>
+<body>
+
 <div id="gl"></div>
 <div id="root"></div>
 
+
 <script>
-(function(){
-"use strict";
+/* ---------- src/01-base.js ---------- */
 var h=React.createElement,TAU=Math.PI*2,V3=THREE.Vector3,V2=THREE.Vector2;
 var BR=0.0286,HW=0.56,HL=1.12,POCK=0.064,MU=0.55,CUSH=0.86,STOP=0.02,FLOOR=-0.78;
+
+/* ── SORTEIO COM SEMENTE ──
+   No multiplayer as duas máquinas simulam a mesma partida em paralelo, e para
+   isso todo sorteio que afeta a física precisa dar o mesmo resultado dos dois
+   lados. rnd() é um mulberry32 semeado pelo código da sala. O que é puramente
+   visual (texturas, áudio, o neon piscando) continua em Math.random. */
+var _sem=123456789;
+function semear(x){_sem=(x>>>0)||1;}
+function rnd(){
+  _sem=(_sem+0x6D2B79F5)>>>0;
+  var t=_sem;
+  t=Math.imul(t^(t>>>15),t|1);
+  t^=t+Math.imul(t^(t>>>7),t|61);
+  return ((t^(t>>>14))>>>0)/4294967296;
+}
+/* Fluxo independente: cada tralha arremessada ganha o seu, semeado pelo
+   número que viaja na mensagem. Assim o tombo de uma bota nunca mexe no
+   sorteio compartilhado — era isso que desalinhava as tacadas seguintes. */
+function fluxo(s){
+  var e=(s>>>0)||1;
+  return function(){
+    e=(e+0x6D2B79F5)>>>0;
+    var t=e;
+    t=Math.imul(t^(t>>>15),t|1);
+    t^=t+Math.imul(t^(t>>>7),t|61);
+    return ((t^(t>>>14))>>>0)/4294967296;
+  };
+}
 var POCKETS=[{x:-HW,z:-HL},{x:HW,z:-HL},{x:-HW,z:0},{x:HW,z:0},{x:-HW,z:HL},{x:HW,z:HL}];
 var BCOL=["#E8B71E","#2660C4","#CF3227","#7B3FBF","#DE6F1B","#1F8F58","#7E2A33",
           "#15181D","#E8B71E","#2660C4","#CF3227","#7B3FBF","#DE6F1B","#1F8F58"];
 
+/* ---------- src/02-texturas.js ---------- */
 /* ══ TEXTURAS PROCEDURAIS ══ */
 function cvs(w,ht){var c=document.createElement("canvas");c.width=w;c.height=ht;return c;}
 function tex(c,rx,ry,srgb){
@@ -267,6 +330,7 @@ function mesh(g,m,px,py,pz){
   e.castShadow=true;e.receiveShadow=true;return e;
 }
 
+/* ---------- src/03-materiais.js ---------- */
 /* ══ MATERIAIS ══ */
 var MAT={};
 function buildMaterials(env){
@@ -302,6 +366,7 @@ function buildMaterials(env){
   MAT.tinRed   = e({color:0xB4271C,roughness:.24,metalness:.85,envMapIntensity:1.3});
 }
 
+/* ---------- src/04-objetos.js ---------- */
 /* ══ OBJETOS-TACO ══ */
 /* `parts` alimenta a análise geométrica; `build` desenha. Mesmas dimensões. */
 var OBJECTS=[
@@ -609,6 +674,7 @@ var JUNK=[
    return g;}}
 ];
 
+/* ---------- src/05-gente.js ---------- */
 /* ══ GENTE ══ */
 var NPCS=[],npcMeshes=[];
 function limb(len,r0,r1,mt){
@@ -687,7 +753,7 @@ function makePerson(cfg){
 }
 function angerNPC(n,o){
   if(n.anger>0)return;
-  n.anger=3.0;
+  n.anger=3.0;Som.raiva();
   var L=n.cfg.lines;
   toast(L[Math.floor(Math.random()*L.length)],n.cfg.nome+" se levantou","bad");
   if(o)n.back={obj:o,t:1.15};
@@ -699,7 +765,7 @@ function animateNPCs(dt){
       n.back.t-=dt;
       if(n.back.t<=0){
         var c=G&&G.balls[0].live?G.balls[0]:{x:0,z:0};
-        var a=Math.random()*TAU;
+        var a=rnd()*TAU;
         hurl(n.back.obj,Math.max(-HW+0.09,Math.min(HW-0.09,c.x+Math.cos(a)*0.17)),0.075,
                         Math.max(-HL+0.09,Math.min(HL-0.09,c.z+Math.sin(a)*0.17)));
         toast("Ele devolveu","bem na sua linha","bad");
@@ -740,6 +806,7 @@ function animateNPCs(dt){
   }
 }
 
+/* ---------- src/06-cena.js ---------- */
 /* ══ CENA ══ */
 var scene,cam,renderer,ray,plane,envMap;
 var ballMesh=[],homeGroups={},markers={},junkPool=[],pickables=[],G=null,hovered=null;
@@ -1050,6 +1117,285 @@ function applyCam(){
   cam.lookAt(orb.tx,orb.ty,orb.tz);
 }
 
+/* ---------- src/07-som.js ---------- */
+/* ══ SOM ══ */
+/* Tudo sintetizado no Web Audio: nenhum arquivo de áudio no projeto.
+   As receitas seguem a acústica real de cada material — bola de resina
+   fenólica tem parciais inarmônicos acima de 3 kHz e decai em ~20 ms;
+   borracha da tabela come os agudos; a caçapa não tem variação de tom
+   nenhuma, é queda + batidas na rede + o gabinete ressoando. */
+var Som=(function(){
+  var ctx=null,mst=null,busS=null,busM=null,ruido=null,env=null,envG=null,
+      ligado=true,ultimo={};
+  try{ligado=localStorage.getItem("sinuca.som")!=="0";}catch(e){}
+
+  function iniciar(externo,soEfeitos){
+    if(ctx&&!externo){if(ctx.state==="suspended")ctx.resume();return ctx;}
+    var AC=window.AudioContext||window.webkitAudioContext;
+    if(!externo&&!AC)return null;
+    try{ctx=externo||new AC();}catch(e){return null;}
+    mst=ctx.createGain();mst.gain.value=ligado?0.85:0;mst.connect(ctx.destination);
+
+    var n=Math.floor(ctx.sampleRate*2),b=ctx.createBuffer(1,n,ctx.sampleRate),d=b.getChannelData(0);
+    for(var i=0;i<n;i++)d[i]=Math.random()*2-1;
+    ruido=b;
+
+    /* reverberação curta de salão: é ela que dá o "clac...c" do bar */
+    var rn=Math.floor(ctx.sampleRate*0.85),ir=ctx.createBuffer(2,rn,ctx.sampleRate);
+    for(var ch=0;ch<2;ch++){
+      var g2=ir.getChannelData(ch);
+      for(var j=0;j<rn;j++){
+        var u=j/rn;
+        g2[j]=(Math.random()*2-1)*Math.pow(1-u,3.4)*(j<ctx.sampleRate*0.008?0.35:1);
+      }
+    }
+    env=ctx.createConvolver();env.buffer=ir;
+    envG=ctx.createGain();envG.gain.value=0.42;env.connect(envG);envG.connect(mst);
+
+    busS=ctx.createGain();busS.gain.value=0.9;busS.connect(mst);
+    var envio=ctx.createGain();envio.gain.value=0.30;busS.connect(envio);envio.connect(env);
+
+    /* a música sai de um alto-falante ruim do outro lado do salão */
+    busM=ctx.createGain();busM.gain.value=0.62;
+    var hp=ctx.createBiquadFilter();hp.type="highpass";hp.frequency.value=300;hp.Q.value=0.7;
+    var lp=ctx.createBiquadFilter();lp.type="lowpass";lp.frequency.value=3300;lp.Q.value=0.6;
+    var med=ctx.createBiquadFilter();med.type="peaking";med.frequency.value=950;
+    med.Q.value=0.9;med.gain.value=5;
+    busM.connect(hp);hp.connect(lp);lp.connect(med);med.connect(mst);
+    var envioM=ctx.createGain();envioM.gain.value=0.24;med.connect(envioM);envioM.connect(env);
+
+    if(soEfeitos)return ctx;
+    ambiente();
+    prox=ctx.currentTime+0.15;
+    if(!timer)timer=setInterval(agenda,110);
+    return ctx;
+  }
+  function pode(k,ms){var t=Date.now();
+    if(ultimo[k]&&t-ultimo[k]<ms)return false; ultimo[k]=t; return true;}
+  function agora(){return ctx.currentTime+0.001;}
+
+  /* ── tijolos ── */
+  /* ataque quase instantâneo (0,6 ms): é o que faz soar percussivo e não "apitado" */
+  function pling(f,dur,vol,t0,tipo,alvo){
+    if(vol<0.0006)return;
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.type=tipo||"sine";o.frequency.setValueAtTime(f,t0);
+    g.gain.setValueAtTime(0,t0);
+    g.gain.linearRampToValueAtTime(vol,t0+0.0006);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    o.connect(g);g.connect(alvo||busS);o.start(t0);o.stop(t0+dur+0.01);
+  }
+  function tom(f,dur,vol,tipo,t0,alvo){          /* usado pela música: ataque suave */
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.type=tipo||"sine";o.frequency.setValueAtTime(f,t0);
+    g.gain.setValueAtTime(0.0001,t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(vol,0.0002),t0+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    o.connect(g);g.connect(alvo||busS);o.start(t0);o.stop(t0+dur+0.02);
+  }
+  function batida(freq,q,dur,vol,t0,tipo,alvo){
+    if(vol<0.0006)return;
+    var src=ctx.createBufferSource();src.buffer=ruido;
+    src.playbackRate.value=0.8+Math.random()*0.4;
+    var f=ctx.createBiquadFilter();f.type=tipo||"bandpass";
+    f.frequency.setValueAtTime(freq,t0);f.Q.value=q;
+    var g=ctx.createGain();
+    g.gain.setValueAtTime(vol,t0);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    src.connect(f);f.connect(g);g.connect(alvo||busS);
+    src.start(t0,Math.random()*1.5);src.stop(t0+dur+0.02);
+  }
+
+  /* ── bola contra bola: resina fenólica ──
+     Parciais inarmônicos altos, decaimento curtíssimo, e o brilho cresce
+     com a força — pancada fraca excita menos modos agudos. */
+  var MODOS=[[3380,0.022,1.00],[4870,0.016,0.70],[6790,0.011,0.44],[9250,0.008,0.24]];
+  function bolas(v){
+    if(!ctx||!pode("b",20))return;
+    var a=Math.min(1,v/3.0); if(a<0.035)return;
+    var t=agora(),br=0.30+0.70*a,det=0.93+Math.random()*0.14;
+    /* Passa-alta obrigatório: senoides que partem juntas da fase zero somam
+       uma subida comum que vira um baque grave inexistente na bola real.
+       O jitter de partida desalinha as fases; o filtro varre o resto. */
+    var hp=ctx.createBiquadFilter();hp.type="highpass";
+    hp.frequency.setValueAtTime(1500,t);hp.Q.value=0.6;hp.connect(busS);
+    for(var i=0;i<MODOS.length;i++)
+      pling(MODOS[i][0]*det,MODOS[i][1],0.34*a*MODOS[i][2]*(i?Math.pow(br,1.4):1),
+            t+Math.random()*0.00045,"sine",hp);
+    batida(6200,0.7,0.0035,0.26*a*br,t,"highpass",hp);
+  }
+  /* ── tabela: a borracha come o agudo, sobra um "poc" abafado ── */
+  function tabela(v){
+    if(!ctx||!pode("t",26))return;
+    var a=Math.min(1,v/3.0); if(a<0.06)return;
+    var t=agora();
+    pling(208,0.048,0.22*a,t,"sine");
+    pling(347,0.030,0.11*a,t,"triangle");
+    batida(680,0.8,0.030,0.14*a,t,"lowpass");
+    batida(2600,0.5,0.018,0.035*a,t,"highpass");      /* raspar do pano */
+  }
+  /* ── taco: couro abafa o estalo; depois o corpo do objeto ressoa ── */
+  var CORPO={taco:[300,0.105,"triangle"],garrafa:[2050,0.170,"sine"],
+             cadeira:[147,0.140,"triangle"],vassoura:[418,0.095,"triangle"],
+             guardachuva:[760,0.075,"sine"]};
+  function tacada(p,id){
+    if(!ctx)return;
+    var t=agora(),a=0.35+0.60*p,C=CORPO[id]||CORPO.taco;
+    batida(1450,0.9,0.006,0.40*a,t,"bandpass");
+    pling(880,0.024,0.24*a,t,"triangle");
+    pling(1560,0.013,0.11*a,t,"sine");
+    pling(C[0],C[1],0.15*a,t+0.002,C[2]);
+  }
+  /* ── caçapa: sem variação de tom nenhuma.
+     Cai, o gabinete ressoa grave, e a bola bate na rede quatro vezes. ── */
+  function cacapa(branca){
+    if(!ctx)return;
+    var t=agora();
+    batida(880,0.6,0.026,0.22,t,"lowpass");            /* sai do pano */
+    pling(78,0.34,0.19,t,"sine");                      /* madeira do gabinete */
+    pling(117,0.21,0.10,t,"sine");
+    [[0.072,0.28],[0.181,0.17],[0.298,0.095],[0.412,0.05]].forEach(function(q,i){
+      var tt=t+q[0];
+      batida(430-i*62,1.0,0.045,q[1],tt,"lowpass");
+      pling(152-i*17,0.055,q[1]*0.55,tt,"sine");
+      batida(3500,0.5,0.075,q[1]*0.15,tt,"highpass");  /* fiapo da rede */
+    });
+    if(branca){                                        /* a branca volta rolando */
+      var src=ctx.createBufferSource();src.buffer=ruido;
+      src.playbackRate.value=0.28;
+      var f=ctx.createBiquadFilter();f.type="lowpass";f.frequency.value=330;f.Q.value=1.4;
+      var g=ctx.createGain();
+      g.gain.setValueAtTime(0.0001,t+0.42);
+      g.gain.exponentialRampToValueAtTime(0.085,t+0.55);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+1.15);
+      src.connect(f);f.connect(g);g.connect(busS);
+      src.start(t+0.42,Math.random());src.stop(t+1.2);
+      pling(62,0.40,0.10,t+0.44,"sine");
+    }
+  }
+  var MAT_SOM={bota:"borracha",tenis:"pano",chinelo:"pano",copo:"vidro",
+               lata:"metal",laranja:"macio",cinzeiro:"vidro",pedra:"pedra",livro:"papel"};
+  function queda(id,v,naMesa){
+    if(!ctx||!pode("q"+id,45))return;
+    var a=Math.min(1,0.25+v/5),t=agora(),m=MAT_SOM[id]||"borracha";
+    if(naMesa)a*=0.85;
+    if(m==="vidro"){
+      var hv=ctx.createBiquadFilter();hv.type="highpass";
+      hv.frequency.setValueAtTime(900,t);hv.Q.value=0.6;hv.connect(busS);
+      batida(3400,1.6,0.006,0.22*a,t,"highpass",hv);
+      pling(2380+Math.random()*640,0.180,0.17*a,t,"sine",hv);
+      pling(3960+Math.random()*900,0.095,0.09*a,t+0.0003,"sine",hv);
+      pling(5700,0.055,0.05*a,t+0.0006,"sine",hv);
+    }else if(m==="metal"){
+      var hm=ctx.createBiquadFilter();hm.type="highpass";
+      hm.frequency.setValueAtTime(420,t);hm.Q.value=0.6;hm.connect(busS);
+      batida(2600,0.8,0.006,0.16*a,t,"highpass",hm);
+      pling(842+Math.random()*120,0.30,0.15*a,t,"triangle",hm);
+      pling(1390,0.20,0.08*a,t+0.0003,"sine",hm);
+      pling(2270,0.12,0.04*a,t+0.0006,"sine",hm);
+    }else if(m==="pedra"){
+      batida(1300,1.1,0.007,0.26*a,t,"bandpass");
+      pling(196,0.070,0.24*a,t,"sine");
+      pling(430,0.038,0.10*a,t,"triangle");
+    }else if(m==="papel"){
+      batida(760,0.5,0.070,0.24*a,t,"lowpass");
+      pling(124,0.055,0.11*a,t,"sine");
+    }else if(m==="macio"){
+      batida(300,0.7,0.075,0.17*a,t,"lowpass");
+      pling(102,0.080,0.12*a,t,"sine");
+    }else if(m==="pano"){
+      batida(470,0.6,0.062,0.19*a,t,"lowpass");
+      pling(133,0.070,0.10*a,t,"sine");
+    }else{
+      batida(230,0.8,0.100,0.26*a,t,"lowpass");
+      pling(94,0.115,0.21*a,t,"sine");
+    }
+  }
+  function pegar(){ if(!ctx)return; var t=agora();
+    batida(1150,0.9,0.030,0.13,t,"bandpass"); pling(540,0.045,0.06,t,"triangle"); }
+  function raiva(){ if(!ctx)return; var t=agora();
+    batida(760,0.5,0.150,0.22,t,"lowpass");
+    pling(214,0.190,0.13,t,"sawtooth");
+    pling(176,0.250,0.09,t+0.05,"sawtooth"); }
+
+  /* ── ambiente ── */
+  function ambiente(){
+    var src=ctx.createBufferSource();src.buffer=ruido;src.loop=true;
+    var f=ctx.createBiquadFilter();f.type="lowpass";f.frequency.value=420;f.Q.value=0.4;
+    var g=ctx.createGain();g.gain.value=0.020;
+    src.connect(f);f.connect(g);g.connect(mst);src.start();
+    var h=ctx.createOscillator(),hg=ctx.createGain();
+    h.type="sine";h.frequency.value=118;hg.gain.value=0.006;
+    h.connect(hg);hg.connect(mst);h.start();
+    (function clink(){
+      setTimeout(function(){
+        if(ctx&&ligado){var t=agora();
+          pling(1900+Math.random()*900,0.14,0.022,t,"sine");
+          pling(2600+Math.random()*800,0.08,0.013,t+0.02,"sine");}
+        clink();},5000+Math.random()*14000);
+    })();
+  }
+
+  /* ── música de bar: shuffle lento, contrabaixo andando,
+     tudo passando por um alto-falante velho do outro lado do salão ── */
+  var BPM=84,SEG=60/BPM,prox=0,pos=0,timer=null;
+  var MIDI=function(m){return 440*Math.pow(2,(m-69)/12);};
+  /* giro I-VI-ii-V, um compasso cada — cadência genérica de boteco */
+  var GIRO=[
+   {r:48,acorde:[60,64,67,69],anda:[48,52,55,57]},   /* C6  */
+   {r:45,acorde:[61,64,67,69],anda:[45,49,52,54]},   /* A7  */
+   {r:50,acorde:[60,65,69,72],anda:[50,53,57,55]},   /* Dm7 */
+   {r:43,acorde:[59,62,65,67],anda:[43,47,50,47]}    /* G7  */
+  ];
+  function agenda(){
+    if(!ctx||ctx.state!=="running")return;
+    while(prox<ctx.currentTime+0.35){
+      passo(pos,prox);
+      prox+=(pos%2===0)?SEG*(2/3):SEG*(1/3);   /* suingue: colcheia em tercina */
+      pos=(pos+1)%32;
+    }
+  }
+  function passo(i,t){
+    var comp=Math.floor(i/8),ac=GIRO[comp%4],batidaN=Math.floor((i%8)/2),oitavo=i%2;
+    if(oitavo===0){                                    /* contrabaixo andando */
+      var nb=ac.anda[batidaN];
+      tom(MIDI(nb),0.42,0.10,"triangle",t,busM);
+      tom(MIDI(nb-12),0.46,0.055,"sine",t,busM);
+    }
+    if(oitavo===0&&(batidaN===0||batidaN===2)){        /* acorde com trêmolo leve */
+      ac.acorde.forEach(function(m,k){
+        var o=ctx.createOscillator(),g=ctx.createGain(),lfo=ctx.createOscillator(),lg=ctx.createGain();
+        o.type=k%2?"sine":"triangle";
+        o.frequency.value=MIDI(m+(batidaN===2?0:0))*(1+(Math.random()-0.5)*0.003);
+        g.gain.setValueAtTime(0.0001,t);
+        g.gain.exponentialRampToValueAtTime(0.042,t+0.03);
+        g.gain.exponentialRampToValueAtTime(0.0001,t+1.25);
+        lfo.type="sine";lfo.frequency.value=5.2;lg.gain.value=0.010;
+        lfo.connect(lg);lg.connect(g.gain);
+        o.connect(g);g.connect(busM);
+        o.start(t);o.stop(t+1.3);lfo.start(t);lfo.stop(t+1.3);
+      });
+    }
+    if(oitavo===0)                                     /* vassourinha: pulso */
+      batida(3400,0.4,0.085,batidaN%2?0.055:0.030,t,"highpass",busM);
+    else                                               /* e o arrasto do suingue */
+      batida(4600,0.5,0.045,0.022,t,"highpass",busM);
+    if(batidaN%2===1&&oitavo===0)                      /* caixa surda em 2 e 4 */
+      pling(196,0.055,0.030,t,"triangle",busM);
+  }
+
+  function alternar(){
+    ligado=!ligado;
+    if(ctx)mst.gain.setTargetAtTime(ligado?0.85:0,ctx.currentTime,0.02);
+    try{localStorage.setItem("sinuca.som",ligado?"1":"0");}catch(e){}
+    return ligado;
+  }
+  return {iniciar:iniciar,alternar:alternar,ativo:function(){return ligado;},
+          bolas:bolas,tabela:tabela,tacada:tacada,cacapa:cacapa,queda:queda,
+          pegar:pegar,raiva:raiva};
+})();
+
+/* ---------- src/08-estado.js ---------- */
 /* ══ ESTADO ══ */
 function placeHome(o){
   var w=homeGroups[o.id],hm=o.home;
@@ -1093,7 +1439,7 @@ function newGame(){
       slots.push({x:(ci-(rows[ri]-1)/2)*d,z:z0-ri*d*0.866});
   slots.splice(12,1);
   var nums=[];for(var n=1;n<=14;n++)nums.push(n);
-  for(var s=nums.length-1;s>0;s--){var j=Math.floor(Math.random()*(s+1)),tp=nums[s];nums[s]=nums[j];nums[j]=tp;}
+  for(var s=nums.length-1;s>0;s--){var j=Math.floor(rnd()*(s+1)),tp=nums[s];nums[s]=nums[j];nums[j]=tp;}
   slots.forEach(function(sl,i){
     b.push({x:sl.x,z:sl.z,vx:0,vz:0,r:BR,cue:false,live:true,num:nums[i]});});
 
@@ -1102,17 +1448,18 @@ function newGame(){
   junkPool=[];
   for(var i=0;i<10;i++){
     var o2=spawnJunk(JUNK[i%JUNK.length]),sp=SPOTS[i%SPOTS.length];
-    o2.x=sp[0]+(Math.random()-0.5)*0.32;o2.z=sp[1]+(Math.random()-0.5)*0.32;
+    o2.x=sp[0]+(rnd()-0.5)*0.32;o2.z=sp[1]+(rnd()-0.5)*0.32;
     o2.home={x:o2.x,z:o2.z};
-    o2.q.setFromEuler(new THREE.Euler(0,Math.random()*TAU,0));
+    o2.q.setFromEuler(new THREE.Euler(0,rnd()*TAU,0));
     o2.y=FLOOR+restY(o2);o2.state="idle";
   }
   OBJECTS.forEach(placeHome);
   return {balls:b,turn:"you",phase:"aim",group:null,foeGroup:null,shots:0,power:0,charging:false,
     obj:OBJECTS[0],foeObj:OBJECTS[2],anim:0,over:false,potted:[],foul:false,
-    throwsLeft:3,foeAimDir:{x:0,z:-1},foeT:0,foePw:0.6,winner:null,foeThrew:false,held:null,aimT:null,aimLock:null,dragX:0,dragY:0};
+    throwsLeft:3,foeAimDir:{x:0,z:-1},foeT:0,foePw:0.6,winner:null,foeThrew:false,held:null,aimT:null,aimLock:null,dragX:0,dragY:0,modo:"ia"};
 }
 
+/* ---------- src/09-fisica.js ---------- */
 /* ══ FÍSICA ══ */
 function stepBalls(dt){
   var B=G.balls,i,j;
@@ -1137,7 +1484,8 @@ function stepBalls(dt){
         var nx=dx/dd,nz=dz/dd,ov=(a.r+c.r-dd)/2;
         a.x-=nx*ov;a.z-=nz*ov;c.x+=nx*ov;c.z+=nz*ov;
         var rv=(c.vx-a.vx)*nx+(c.vz-a.vz)*nz;
-        if(rv<0){var im=rv*0.97;a.vx+=im*nx;a.vz+=im*nz;c.vx-=im*nx;c.vz-=im*nz;}}}
+        if(rv<0){var im=rv*0.97;a.vx+=im*nx;a.vz+=im*nz;c.vx-=im*nx;c.vz-=im*nz;
+          Som.bolas(-rv);}}}
     for(j=0;j<junkPool.length;j++){
       var o2=junkPool[j];if(!o2.onTable||o2.state!=="rest")continue;
       var ex=o2.x-a.x,ez=o2.z-a.z,ed=Math.hypot(ex,ez),sum=a.r+o2.r;
@@ -1147,15 +1495,17 @@ function stepBalls(dt){
         var rv2=(o2.vx-a.vx)*ux+(o2.vz-a.vz)*uz;
         if(rv2<0){
           var mr=1/(1+1/o2.mass),ip=rv2*1.7*mr;
-          a.vx+=ip*ux;a.vz+=ip*uz;o2.vx-=ip*ux/o2.mass;o2.vz-=ip*uz/o2.mass;o2.hit=0.5;}}}
-    if(a.x<-HW+a.r){a.x=-HW+a.r;a.vx=-a.vx*CUSH;}
-    if(a.x> HW-a.r){a.x= HW-a.r;a.vx=-a.vx*CUSH;}
-    if(a.z<-HL+a.r){a.z=-HL+a.r;a.vz=-a.vz*CUSH;}
-    if(a.z> HL-a.r){a.z= HL-a.r;a.vz=-a.vz*CUSH;}
+          a.vx+=ip*ux;a.vz+=ip*uz;o2.vx-=ip*ux/o2.mass;o2.vz-=ip*uz/o2.mass;o2.hit=0.5;
+          Som.queda(o2.t.id,-rv2*1.6,true);}}}
+    if(a.x<-HW+a.r){a.x=-HW+a.r;a.vx=-a.vx*CUSH;Som.tabela(Math.abs(a.vx));}
+    if(a.x> HW-a.r){a.x= HW-a.r;a.vx=-a.vx*CUSH;Som.tabela(Math.abs(a.vx));}
+    if(a.z<-HL+a.r){a.z=-HL+a.r;a.vz=-a.vz*CUSH;Som.tabela(Math.abs(a.vz));}
+    if(a.z> HL-a.r){a.z= HL-a.r;a.vz=-a.vz*CUSH;Som.tabela(Math.abs(a.vz));}
     for(j=0;j<POCKETS.length;j++){
       var p=POCKETS[j];
       if(Math.hypot(a.x-p.x,a.z-p.z)<POCK*0.93){
         a.live=false;a.vx=0;a.vz=0;
+        Som.cacapa(a.cue);
         if(a.cue)G.foul=true;else G.potted.push(a.num);
         break;}}}
 }
@@ -1174,8 +1524,9 @@ function stepJunk(dt){
         if(ddx*ddx+ddz*ddz<0.085&&Math.abs(ddy)<0.44){
           o.state="rest";o.onTable=false;o.vx=o.vy=o.vz=0;o.av.set(0,0,0);
           o.y=FLOOR+restY(o);
-          o.x=np.root.position.x+(Math.random()-0.5)*0.5;
-          o.z=np.root.position.z+0.42+Math.random()*0.2;
+          var rj=o.rng||rnd;
+          o.x=np.root.position.x+(rj()-0.5)*0.5;
+          o.z=np.root.position.z+0.42+rj()*0.2;
           angerNPC(np,o);break;}}
       if(o.state!=="fly"){o.g.position.set(o.x,o.y,o.z);o.g.quaternion.copy(o.q);continue;}
       o.x+=o.vx*dt;o.z+=o.vz*dt;
@@ -1187,10 +1538,12 @@ function stepJunk(dt){
       if(o.y<=gr){
         o.y=gr;
         var soft=onT?0.10:0.34;          /* o pano mata quase toda a energia */
+        Som.queda(o.t.id,Math.abs(o.vy),onT);
         if(Math.abs(o.vy)>(onT?1.05:0.60)){
           o.vy=-o.vy*soft;o.vx*=onT?0.16:0.50;o.vz*=onT?0.16:0.50;
           o.av.multiplyScalar(0.35);
-          o.av.x+=(Math.random()-0.5)*3.0;o.av.z+=(Math.random()-0.5)*3.0;
+          var rb=o.rng||rnd;
+          o.av.x+=(rb()-0.5)*3.0;o.av.z+=(rb()-0.5)*3.0;
         }else{
           o.vy=0;o.av.set(0,0,0);o.state="rest";o.onTable=onT;
           o.y=(onT?0:FLOOR)+restY(o);
@@ -1216,13 +1569,20 @@ function solveThrow(sx,sy,sz,tx,ty,tz){
   var tUp=Math.sqrt(2*A/GACC),tDn=Math.sqrt(2*Math.max(0.02,A-dy)/GACC),T=tUp+tDn;
   return {T:T,vx:(tx-sx)/T,vz:(tz-sz)/T,vy:GACC*tUp};
 }
-function hurl(o,tx,ty,tz){
+function hurl(o,tx,ty,tz,sem){
   if(o.state==="fly")return false;
+  /* O tombo sorteia bastante (giro inicial e a cada quique). Antes isso saía
+     do sorteio compartilhado, e como a tralha voa no relógio de parede as duas
+     máquinas consumiam o fluxo em ordens diferentes: a tacada seguinte já
+     nascia com outro desvio. Agora cada arremesso leva a sua própria semente
+     na mensagem e não encosta no fluxo comum. */
+  o.sem=(sem>>>0)||((rnd()*4294967296)>>>0)||1;
+  o.rng=fluxo(o.sem);
   var sy=Math.max(o.y,FLOOR+0.42);o.y=sy;
   var sol=solveThrow(o.x,sy,o.z,tx,ty,tz);
   o.state="fly";o.onTable=false;o.held=false;
   o.vx=sol.vx;o.vy=sol.vy;o.vz=sol.vz;
-  o.av.set((Math.random()-0.5)*15,(Math.random()-0.5)*15,(Math.random()-0.5)*15);
+  o.av.set((o.rng()-0.5)*15,(o.rng()-0.5)*15,(o.rng()-0.5)*15);
   return true;
 }
 /* mira do arremesso: pessoa sob o cursor, senão o pano */
@@ -1239,7 +1599,7 @@ function throwAim(){
 function tableTarget(){
   var cue=G.balls[0];
   for(var k=0;k<90;k++){
-    var x=(Math.random()*2-1)*(HW-0.10),z=(Math.random()*2-1)*(HL-0.10),ok=true,i;
+    var x=(rnd()*2-1)*(HW-0.10),z=(rnd()*2-1)*(HL-0.10),ok=true,i;
     for(i=0;i<G.balls.length;i++){var b=G.balls[i];
       if(b.live&&Math.hypot(b.x-x,b.z-z)<0.13){ok=false;break;}}
     for(i=0;ok&&i<POCKETS.length;i++)
@@ -1248,15 +1608,23 @@ function tableTarget(){
       if(o.onTable&&Math.hypot(o.x-x,o.z-z)<0.17){ok=false;break;}}
     if(ok&&cue.live){var dd=Math.hypot(cue.x-x,cue.z-z);if(dd<0.15||dd>1.0)ok=false;}
     if(ok)return {x:x,z:z};}
-  return {x:(Math.random()*2-1)*HW*0.6,z:(Math.random()*2-1)*HL*0.6};
+  return {x:(rnd()*2-1)*HW*0.6,z:(rnd()*2-1)*HL*0.6};
 }
-function shoot(dir,power,who){
+function shoot(dir,power,who,vel){
   var cue=G.balls[0];if(!cue.live)return;
   var an=(who==="you"?G.obj:G.foeObj).an;
-  var dev=(1-an.precisao)*0.34*(0.35+0.65*power)*(1.45-an.controle);
-  var ang=Math.atan2(dir.z,dir.x)+(Math.random()-0.5)*2*dev;
-  var v=(0.30+0.70*power)*(2.1+an.potencia*4.6);
-  cue.vx=Math.cos(ang)*v;cue.vz=Math.sin(ang)*v;
+  if(vel){
+    /* Online: a velocidade vem pronta de quem tacou. Recalcular aqui dependia
+       do fluxo de sorteio estar no mesmo ponto dos dois lados — e bastava um
+       quique de tralha a mais para as duas mesas saírem diferentes. */
+    cue.vx=vel.vx;cue.vz=vel.vz;
+  }else{
+    var dev=(1-an.precisao)*0.34*(0.35+0.65*power)*(1.45-an.controle);
+    var ang=Math.atan2(dir.z,dir.x)+(rnd()-0.5)*2*dev;
+    var v=(0.30+0.70*power)*(2.1+an.potencia*4.6);
+    cue.vx=Math.cos(ang)*v;cue.vz=Math.sin(ang)*v;
+  }
+  Som.tacada(power,(who==="you"?G.obj:G.foeObj).id);
   G.potted=[];G.foul=false;G.phase="roll";G.shots++;
 }
 function railClamp(x,z,dx,dz,maxT){
@@ -1307,12 +1675,13 @@ function foeAimCompute(){
       var clear=(f.tag==="ball"&&Math.hypot(f.x-gx,f.z-gz)<BR*2.6)?1:0.22;
       var sc=dot*clear*(1/(0.5+pl))*(1/(0.6+cl*0.4));
       if(!best||sc>best.sc)best={sc:sc,dx:dx,dz:dz,pw:Math.min(1,0.42+cl*0.26+pl*0.2)};}}
-  if(!best){var a=Math.random()*TAU;best={sc:0,dx:Math.cos(a),dz:Math.sin(a),pw:0.55};}
+  if(!best){var a=rnd()*TAU;best={sc:0,dx:Math.cos(a),dz:Math.sin(a),pw:0.55};}
   return best;
 }
 
 /* ══ TURNOS ══ */
 var setUI=null,mouse={x:0,y:0},sx=0,sy=0,prev=0,toastT=0;
+var DT_FIXO=1/120,acumul=0,CANCELA=0.06;
 function ui(p){if(setUI)setUI(function(s){return Object.assign({},s,p);});}
 function toast(t,sub,k){toastT=1.7;ui({toast:t,toastSub:sub||"",toastKind:k||"good"});}
 function sync(){
@@ -1329,9 +1698,20 @@ function respot(){
     for(i=0;!bad&&i<junkPool.length;i++){var o=junkPool[i];
       if(o.onTable&&Math.hypot(o.x-c.x,o.z-c.z)<o.r+BR*1.4){bad=true;break;}}
     if(!bad)return;
-    c.x=(Math.random()*2-1)*HW*0.72;c.z=HL*(0.25+Math.random()*0.42);}
+    c.x=(rnd()*2-1)*HW*0.72;c.z=HL*(0.25+rnd()*0.42);}
 }
+/* Quem tacou é a autoridade daquela jogada: no fim ele manda a mesa inteira e
+   o outro lado encaixa. É o que fecha qualquer diferença que tenha nascido de
+   uma tralha arremessada no meio da rolagem, que chega em instantes simulados
+   diferentes nas duas máquinas. */
 function endTurn(){
+  var quem=G.turn;
+  fecharJogada();
+  if(G.modo!=="online")return;
+  if(quem==="you"){ Rede.enviar({t:"estado",auto:1,s:tirarSnap()}); }
+  else if(snapPend){ var sp=snapPend; snapPend=null; aplicarSnap(sp,true); }
+}
+function fecharJogada(){
   G.balls.forEach(function(b){b.vx=0;b.vz=0;});
   junkPool.forEach(function(o){if(o.onTable){o.vx=0;o.vz=0;}});
   var who=G.turn,potted=G.potted.slice(),foul=G.foul;
@@ -1353,9 +1733,14 @@ function endTurn(){
     else if(own&&!other)toast(own>1?own+" na caçapa":"Encaçapou","joga de novo","good");
     else if(other)toast("Bola do adversário","passou a vez","bad");
     if(again){G.phase="aim";sync();return;}
-    G.turn="foe";G.phase="foe-pick";G.anim=0.6;
+    G.turn="foe";
+    if(G.modo==="online"){G.phase="aguardando";}
+    else{G.phase="foe-pick";G.anim=0.6;}
   }else{
-    if(again){G.phase="foe-pick";G.anim=0.55;sync();return;}
+    if(again){
+      if(G.modo==="online")G.phase="aguardando";
+      else{G.phase="foe-pick";G.anim=0.55;}
+      sync();return;}
     G.turn="you";G.phase="aim";
     if(G.held){G.held.state="idle";G.held.y=FLOOR+restY(G.held);G.held=null;}
     G.throwsLeft=Math.min(3,G.throwsLeft+1);
@@ -1363,6 +1748,7 @@ function endTurn(){
   sync();
 }
 
+/* ---------- src/10-loop.js ---------- */
 /* ══ LOOP ══ */
 function proj3(x,y,z){
   var v=new V3(x,y,z).project(cam);
@@ -1407,7 +1793,8 @@ function updateHover(){
   if(!G||G.over)return;
   var canCue=(G.phase==="aim");
   var canThrow=(G.turn==="foe"&&G.throwsLeft>0&&!G.held&&
-    (G.phase==="foe-pick"||G.phase==="foe-aim"||G.phase==="foe-hit"||G.phase==="roll"));
+    (G.phase==="foe-pick"||G.phase==="foe-aim"||G.phase==="foe-hit"||
+     G.phase==="aguardando"||G.phase==="roll"));
   var canRemove=(G.turn==="you"&&G.phase==="aim"&&!G.held);
   if(!canCue&&!canThrow&&!canRemove)return;
   ray.setFromCamera(new THREE.Vector2(mouse.x,mouse.y),cam);
@@ -1422,6 +1809,27 @@ function updateHover(){
     if(ow.kind==="junk"&&canThrow&&ow.obj.state==="idle"&&!ow.obj.onTable){
       hovered={kind:"junk",obj:ow.obj};return;}}
 }
+/* Uma porta só para cada ação de rede: simula primeiro, avisa depois com o
+   resultado exato. Assim o teste automatizado percorre o mesmo caminho do
+   jogador de verdade, sem uma segunda cópia da lógica para sair de sincronia. */
+function recolher(ro,ang){
+  ro.state="idle";ro.onTable=false;ro.vx=0;ro.vy=0;ro.vz=0;ro.av.set(0,0,0);
+  ro.x=ro.home.x;ro.z=ro.home.z;
+  ro.q.setFromEuler(new THREE.Euler(0,ang,0));
+  ro.y=FLOOR+restY(ro);
+  ro.g.position.set(ro.x,ro.y,ro.z);ro.g.quaternion.copy(ro.q);
+}
+function tacar(dir,pw){
+  shoot(dir,pw,"you");
+  if(G.modo==="online")Rede.enviar({t:"tacada",dx:dir.x,dz:dir.z,p:pw,obj:G.obj.id,
+    vx:G.balls[0].vx,vz:G.balls[0].vz});
+}
+function arremessar(jo,at){
+  var jIdx=junkPool.indexOf(jo);
+  if(!hurl(jo,at.x,at.y,at.z))return false;
+  if(G.modo==="online")Rede.enviar({t:"arremesso",j:jIdx,x:at.x,z:at.z,sem:jo.sem});
+  return true;
+}
 function frame(ts){
   requestAnimationFrame(frame);
   if(!prev)prev=ts;
@@ -1430,12 +1838,21 @@ function frame(ts){
   if(toastT>0){toastT-=dt;if(toastT<=0)ui({toast:null});}
   if(neonL)neonL.intensity=1.15+Math.sin(ts*0.011)*0.28+(Math.random()<0.02?-0.85:0);
 
-  if(G.phase==="roll"){
-    for(var s=0;s<5;s++)stepBalls(dt/5);
-    stepJunk(dt);
-    if(!moving())endTurn();
-  }else{
-    stepJunk(dt);
+  /* Passo fixo: com dt variável cada máquina daria um número diferente de
+     integrações e as simulações divergiriam. Aqui as duas dão exatamente o
+     mesmo número de passos para o mesmo tempo simulado. */
+  acumul+=dt; if(acumul>0.25)acumul=0.25;
+  var nPassos=0;
+  while(acumul>=DT_FIXO&&nPassos<40){
+    if(G.phase==="roll")stepBalls(DT_FIXO);
+    stepJunk(DT_FIXO);
+    /* Dentro do laço de propósito: testado uma vez por quadro, uma máquina a
+       50fps encerrava a jogada num instante simulado diferente de outra a
+       144fps — e endTurn zera velocidades e pode repor a branca. */
+    if(G.phase==="roll"&&!moving())endTurn();
+    acumul-=DT_FIXO; nPassos++;
+  }
+  if(G.phase!=="roll"){
     if(G.phase==="foe-pick"){
       G.anim-=dt;
       if(G.anim<=0){
@@ -1542,8 +1959,10 @@ function frame(ts){
         }else defLine.visible=false;
       }else{objLine.visible=false;defLine.visible=false;objDot.visible=false;}
       poseCue(G.obj,d,0.055+G.power*0.40,true);}
-    homeGroups[G.foeObj.id].visible=(G.foeObj.id!==G.obj.id)?true:false;
-    if(G.foeObj.id!==G.obj.id&&!homeGroups[G.foeObj.id].userData.atHome)placeHome(G.foeObj);
+    if(G.foeObj.id!==G.obj.id){
+      if(!homeGroups[G.foeObj.id].userData.atHome)placeHome(G.foeObj);
+      homeGroups[G.foeObj.id].visible=true;
+    }
   }else if(G.phase==="foe-aim"||G.phase==="foe-hit"){
     var fd=G.foeAimDir,c2=G.balls[0];
     var wob=G.phase==="foe-aim"?Math.sin(G.foeT*3.0)*0.030:0;
@@ -1566,13 +1985,33 @@ function frame(ts){
 
 /* ══ ENTRADA ══ */
 var ptrs={},orbit={on:false,px:0,py:0},pinch=0;
+/* Desistir da tacada tem que ser sempre a MESMA coisa, venha de onde vier:
+   soltar na origem, botão direito, dois dedos, alt-tab ou um pointercancel do
+   navegador. Faltando isso, um "pointercancel" no meio do puxão caía no
+   endPtr e virava tacada de verdade — a vez passava, a mensagem ia para o
+   outro lado e a partida saía do lugar sem o jogador ter batido. */
+function cancelarTacada(aviso){
+  if(!G||!G.charging&&!G.aimLock&&!G.power)return false;
+  G.charging=false;G.power=0;G.aimLock=null;
+  if(aviso)toast("Tacada cancelada","o taco voltou para a origem","cold");
+  return true;
+}
 function setCursor(){
   var cl=renderer.domElement.classList;
   cl.remove("pick");cl.remove("orbit");
   if(orbit.on)cl.add("orbit");else if(hovered)cl.add("pick");
 }
-addEventListener("contextmenu",function(e){e.preventDefault();});
+/* Em vários navegadores o botão direito não gera pointerdown, só contextmenu.
+   Sem desistir aqui o "charging" sobrevivia, e o pointerup seguinte — o do
+   botão ESQUERDO, que o jogador solta em seguida — disparava a tacada que ele
+   tinha acabado de cancelar. */
+addEventListener("contextmenu",function(e){
+  e.preventDefault();
+  cancelarTacada(G&&G.charging&&G.power>=CANCELA);
+  setCursor();
+});
 addEventListener("pointerdown",function(e){
+  Som.iniciar();
   if(e.target&&e.target.closest&&e.target.closest(".ui"))return;
   ptrs[e.pointerId]={x:e.clientX,y:e.clientY};
   var n=Object.keys(ptrs).length;
@@ -1580,12 +2019,12 @@ addEventListener("pointerdown",function(e){
     orbit.on=true;orbit.px=e.clientX;orbit.py=e.clientY;
     if(n>=2){var k=Object.keys(ptrs);
       pinch=Math.hypot(ptrs[k[0]].x-ptrs[k[1]].x,ptrs[k[0]].y-ptrs[k[1]].y);}
-    if(G)G.charging=false;
+    cancelarTacada(G&&G.charging&&G.power>0.045);
     setCursor();return;}
   if(!G||G.over)return;
   if(G.held){
-    var at=throwAim();
-    if(at&&hurl(G.held,at.x,at.y,at.z)){
+    var at=throwAim(),jo=G.held;
+    if(at&&arremessar(jo,at)){
       G.throwsLeft--;
       toast(at.npc?"Mirou em gente":"Arremessou",
         at.npc?"isso não vai acabar bem":G.throwsLeft+" restantes",at.npc?"bad":"cold");
@@ -1595,18 +2034,23 @@ addEventListener("pointerdown",function(e){
   if(hovered){
     if(hovered.kind==="cue"){
       var o=OBJECTS.filter(function(x){return x.id===hovered.id;})[0];
-      equip(o);toast("Pegou",o.nome.toLowerCase(),"good");sync();
+      equip(o);Som.pegar();
+      if(G.modo==="online")Rede.enviar({t:"taco",obj:o.id});
+      toast("Pegou",o.nome.toLowerCase(),"good");sync();
     }else if(hovered.kind==="rm"){
-      var ro=hovered.obj;
-      ro.state="idle";ro.onTable=false;ro.vx=0;ro.vz=0;ro.av.set(0,0,0);
-      ro.x=ro.home.x;ro.z=ro.home.z;
-      ro.q.setFromEuler(new THREE.Euler(0,Math.random()*TAU,0));
-      ro.y=FLOOR+restY(ro);
-      ro.g.position.set(ro.x,ro.y,ro.z);ro.g.quaternion.copy(ro.q);
+      var ro=hovered.obj,ang=rnd()*TAU;
+      recolher(ro,ang);
+      if(G.modo==="online")Rede.enviar({t:"retirar",j:junkPool.indexOf(ro),a:ang});
       toast("Tirou "+ro.t.nome.toLowerCase()+" da mesa","custou a sua vez","bad");
-      G.turn="foe";G.phase="foe-pick";G.anim=0.9;sync();
+      G.turn="foe";
+      /* Online quem joga é gente do outro lado: acordar a máquina de fases da
+         IA aqui fazia o meu lado inventar uma tacada que nunca existiu — e a
+         partida inteira saía do lugar a partir daí. */
+      if(G.modo==="online")G.phase="aguardando";
+      else{G.phase="foe-pick";G.anim=0.9;}
+      sync();
     }else if(hovered.kind==="junk"&&G.throwsLeft>0&&!G.held){
-      var ob=hovered.obj;ob.state="held";ob.holdY=ob.y+0.55;G.held=ob;
+      var ob=hovered.obj;ob.state="held";ob.holdY=ob.y+0.55;G.held=ob;Som.pegar();
       toast("Pegou "+ob.t.nome.toLowerCase(),"mire e clique para arremessar","cold");sync();}
     hovered=null;ui({hov:null});setCursor();return;}
   if(G.phase!=="aim")return;
@@ -1646,15 +2090,27 @@ function endPtr(e){
   if(orbit.on){setCursor();return;}
   setCursor();
   if(!G||!G.charging)return;
-  G.charging=false;
-  var d=G.aimLock||aimDir();
-  if(d&&G.phase==="aim"){
-    if(G.power<0.045)toast("Tacada cancelada","puxe o taco para trás para dar força","cold");
-    else shoot(d,G.power,"you");}
-  G.power=0;G.aimLock=null;
+  if(e&&typeof e.button==="number"&&e.button>0){   /* direito/meio: desiste */
+    cancelarTacada(G.power>=CANCELA);setCursor();return;}
+  var d=G.aimLock||aimDir(),pw=G.power;
+  G.charging=false;G.power=0;G.aimLock=null;
+  if(!d||G.phase!=="aim")return;
+  if(pw<CANCELA){toast("Tacada cancelada","puxe o taco para trás para dar força","cold");return;}
+  tacar(d,pw);
 }
 addEventListener("pointerup",endPtr);
-addEventListener("pointercancel",endPtr);
+/* pointercancel NÃO é endPtr: o navegador dispara isso quando toma a gesto
+   para si (alt-tab, gesto do trackpad, toque virando rolagem) e aí o jogador
+   não bateu em nada. Antes isso tacava com a força que estivesse carregada. */
+addEventListener("pointercancel",function(e){
+  delete ptrs[e.pointerId];
+  if(Object.keys(ptrs).length<1){orbit.on=false;pinch=0;}
+  cancelarTacada(G&&G.charging&&G.power>CANCELA);setCursor();
+});
+/* sair da janela no meio do puxão também é desistir */
+addEventListener("blur",function(){ptrs={};orbit.on=false;pinch=0;cancelarTacada(false);setCursor();});
+document.addEventListener("visibilitychange",function(){
+  if(document.hidden){ptrs={};orbit.on=false;pinch=0;cancelarTacada(false);setCursor();}});
 addEventListener("keydown",function(e){
   if(e.key==="Escape"&&G&&G.held){
     G.held.state="idle";G.held.y=FLOOR+restY(G.held);G.held=null;
@@ -1665,6 +2121,231 @@ addEventListener("wheel",function(e){
   orb.rad=Math.max(1.7,Math.min(8.5,orb.rad*(1+e.deltaY*0.0011)));applyCam();
 },{passive:false});
 
+/* ---------- src/11-rede.js ---------- */
+/* ══ REDE ══ */
+/* Multiplayer por WebRTC (PeerJS), sem servidor de jogo.
+   O truque: sinuca é por turnos e a simulação é determinística, então em vez
+   de transmitir a posição das bolas eu mando UMA mensagem por jogada — direção,
+   força e objeto. Os dois lados simulam igual e ficam sincronizados sozinhos.
+   O código da sala vira a semente do sorteio, então nem isso precisa trafegar. */
+var Rede=(function(){
+  var peer=null,conn=null,papel=null,sala=null,estado="off",
+      tentativa=0,timerRec=null,aoAbrir=null,aoStatus=null;
+  var ALFA="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";   /* sem O/0/I/1 */
+
+  function novoCodigo(){
+    var c="";for(var i=0;i<5;i++)c+=ALFA[Math.floor(Math.random()*ALFA.length)];
+    return c;
+  }
+  function idDe(c){return "sinucasuja-v1-"+c;}
+  function sementeDe(c){                          /* código → semente compartilhada */
+    var h=2166136261;
+    for(var i=0;i<c.length;i++){h^=c.charCodeAt(i);h=Math.imul(h,16777619);}
+    return h>>>0;
+  }
+  function status(e,extra){
+    estado=e;
+    if(aoStatus)aoStatus(e,extra);
+  }
+  function temPeerJS(){return typeof Peer!=="undefined";}
+
+  function abrirPeer(id,cb){
+    if(!temPeerJS()){status("erro","PeerJS não carregou");return;}
+    /* window.PEER_CFG permite apontar para um servidor de sinalização próprio;
+       sem ele usa o broker público do PeerJS, que é gratuito. */
+    var cfg=Object.assign({debug:0},window.PEER_CFG||{});
+    try{peer=id?new Peer(id,cfg):new Peer(cfg);}catch(e){status("erro",String(e));return;}
+    peer.on("open",function(){cb&&cb();});
+    peer.on("error",function(err){
+      var t=String(err&&err.type||err);
+      if(t==="unavailable-id")status("erro","essa sala já existe, tente outro código");
+      else if(t==="peer-unavailable")status("erro","sala não encontrada");
+      else if(t==="network"||t==="server-error"||t==="socket-error")agendarRec();
+      else status("erro",t);
+    });
+    peer.on("disconnected",function(){ if(estado!=="off")agendarRec(); });
+  }
+  function armar(c){
+    conn=c;
+    conn.on("open",function(){
+      tentativa=0;
+      status("ligado");
+      if(papel==="anfitriao"&&aoAbrir)aoAbrir();
+    });
+    conn.on("data",function(m){ receber(m); });
+    conn.on("close",function(){ if(estado!=="off"){status("caiu");agendarRec();} });
+    conn.on("error",function(){ if(estado!=="off")agendarRec(); });
+  }
+  /* ── reconexão ── */
+  function agendarRec(){
+    if(estado==="off"||timerRec)return;
+    status("reconectando",++tentativa);
+    var espera=Math.min(8000,1200*tentativa);
+    timerRec=setTimeout(function(){
+      timerRec=null;
+      if(estado==="off")return;
+      try{
+        if(peer&&peer.disconnected&&!peer.destroyed)peer.reconnect();
+      }catch(e){}
+      if(papel==="convidado"&&peer&&!peer.destroyed){
+        try{armar(peer.connect(idDe(sala),{reliable:true}));}catch(e){}
+      }
+      if(estado!=="ligado")agendarRec();
+    },espera);
+  }
+
+  function criar(cb,cbStatus){
+    papel="anfitriao";sala=novoCodigo();aoAbrir=cb;aoStatus=cbStatus;
+    salvar();
+    status("abrindo");
+    abrirPeer(idDe(sala),function(){status("esperando");});
+    peer.on("connection",function(c){
+      if(conn&&conn.open){try{c.close();}catch(e){}return;}   /* sala cheia */
+      armar(c);
+      c.on("open",function(){
+        c.send({t:"inicio",semente:sementeDe(sala),sala:sala});
+      });
+    });
+    return sala;
+  }
+  function entrar(c,cb,cbStatus){
+    papel="convidado";sala=(c||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+    aoAbrir=cb;aoStatus=cbStatus;
+    if(sala.length<4){status("erro","código curto demais");return null;}
+    salvar();
+    status("abrindo");
+    abrirPeer(null,function(){
+      status("conectando");
+      armar(peer.connect(idDe(sala),{reliable:true}));
+    });
+    return sala;
+  }
+  function sair(){
+    status("off");
+    if(timerRec){clearTimeout(timerRec);timerRec=null;}
+    try{if(conn)conn.close();}catch(e){}
+    try{if(peer)peer.destroy();}catch(e){}
+    conn=null;peer=null;papel=null;sala=null;tentativa=0;
+    try{localStorage.removeItem("sinuca.sala");}catch(e){}
+  }
+  function salvar(){
+    try{localStorage.setItem("sinuca.sala",JSON.stringify({sala:sala,papel:papel,q:Date.now()}));}catch(e){}
+  }
+  function retomar(){                              /* sala guardada de antes */
+    try{
+      var v=JSON.parse(localStorage.getItem("sinuca.sala")||"null");
+      if(v&&Date.now()-v.q<1000*60*60)return v;
+    }catch(e){}
+    return null;
+  }
+  function enviar(m){
+    if(conn&&conn.open){try{conn.send(m);}catch(e){}}
+  }
+  return {criar:criar,entrar:entrar,sair:sair,enviar:enviar,retomar:retomar,
+          semente:sementeDe,estado:function(){return estado;},
+          sala:function(){return sala;},papel:function(){return papel;},
+          ligado:function(){return !!(conn&&conn.open);}};
+})();
+
+/* ── aplica o que chega do outro lado ── */
+function receber(m){
+  if(!m||!m.t)return;
+  if(m.t==="inicio"){ iniciarOnline(m.semente); return; }
+  if(!G)return;
+  if(m.t==="taco"){
+    var o=OBJECTS.filter(function(x){return x.id===m.obj;})[0];
+    if(o){equipFoe(o);sync();}
+    return;
+  }
+  if(m.t==="tacada"){
+    /* equipa SEMPRE: a potência do objeto entra no cálculo da tacada, e um
+       guarda aqui fazia o convidado simular com outro taco — as duas mesas
+       divergiam 9% na distância percorrida. */
+    var ob=OBJECTS.filter(function(x){return x.id===m.obj;})[0];
+    if(ob)equipFoe(ob);
+    G.turn="foe"; G.phase="aim";
+    shoot({x:m.dx,z:m.dz},m.p,"foe",
+      (typeof m.vx==="number")?{vx:m.vx,vz:m.vz}:null);
+    return;
+  }
+  if(m.t==="arremesso"){
+    var j=junkPool[m.j];
+    if(j)hurl(j,m.x,0.075,m.z,m.sem);
+    return;
+  }
+  if(m.t==="retirar"){
+    var r=junkPool[m.j];
+    if(r){
+      /* o ângulo vem na mensagem: antes quem tirava sorteava um rnd() que o
+         outro lado não gastava, e os dois fluxos saíam de passo */
+      recolher(r,(typeof m.a==="number")?m.a:rnd()*TAU);
+      G.turn="you";G.phase="aim";sync();
+      toast("Ele tirou "+r.t.nome.toLowerCase(),"perdeu a vez dele","good");
+    }
+    return;
+  }
+  if(m.t==="estado"){
+    /* Não corta a rolagem no meio: guarda e encaixa quando as bolas param. */
+    if(m.auto&&G.phase==="roll"){ snapPend=m.s; return; }
+    aplicarSnap(m.s,!!m.auto); return;
+  }
+  if(m.t==="pedeEstado"){ Rede.enviar({t:"estado",s:tirarSnap()}); return; }
+}
+/* ── sincronização depois de uma queda ── */
+var snapPend=null;
+function tirarSnap(){
+  return {sem:_sem,turn:G.turn,phase:G.phase,group:G.group,foeGroup:G.foeGroup,
+    over:G.over?1:0,winner:G.winner,
+    shots:G.shots,thr:G.throwsLeft,
+    b:G.balls.map(function(b){return [b.x,b.z,b.live?1:0,b.num];}),
+    j:junkPool.map(function(o){return [o.x,o.y,o.z,o.q.x,o.q.y,o.q.z,o.q.w,
+      o.state,o.onTable?1:0];})};
+}
+function aplicarSnap(s,quieto){
+  if(!s||!G)return;
+  _sem=s.sem;
+  /* o snapshot vem do anfitrião, cujo "you" é o meu "foe" */
+  G.turn=(s.turn==="you")?"foe":"you";
+  G.phase=(s.phase==="roll")?"roll":(G.turn==="you"?"aim":"aguardando");
+  G.group=s.foeGroup; G.foeGroup=s.group;
+  G.shots=s.shots;
+  s.b.forEach(function(v,i){ var b=G.balls[i]; if(!b)return;
+    b.x=v[0];b.z=v[1];b.live=!!v[2];b.num=v[3];b.vx=0;b.vz=0; });
+  s.j.forEach(function(v,i){ var o=junkPool[i]; if(!o)return;
+    /* tralha na mão (minha ou dele) não entra no encaixe: a jogada dela ainda
+       nem aconteceu, e o arremesso chega na mensagem própria */
+    if(o.state==="held"||v[7]==="held")return;
+    o.x=v[0];o.y=v[1];o.z=v[2];
+    o.q.set(v[3],v[4],v[5],v[6]);
+    o.state=(v[7]==="fly")?"rest":v[7];
+    o.onTable=!!v[8];o.vx=0;o.vy=0;o.vz=0;o.av.set(0,0,0);
+    if(o.state==="rest"&&!o.onTable)o.y=FLOOR+restY(o);
+    o.g.position.set(o.x,o.y,o.z);o.g.quaternion.copy(o.q); });
+  if(s.over){
+    G.over=true;G.phase="over";
+    G.winner=(s.winner==="you")?"foe":"you";
+    ui({over:true,winner:G.winner,shots:G.shots,group:G.group});
+    return;
+  }
+  G.over=false;
+  sync();
+  if(!quieto)toast("Sincronizado","a partida continua","good");
+}
+function iniciarOnline(semente){
+  semear(semente);
+  G=newGame(); G.modo="online";
+  equip(OBJECTS[0]); equipFoe(OBJECTS[2]);
+  /* anfitrião começa; convidado espera */
+  var souAnfitriao=(Rede.papel()==="anfitriao");
+  G.turn=souAnfitriao?"you":"foe";
+  G.phase=souAnfitriao?"aim":"aguardando";
+  if(setUI)setUI(function(o){return Object.assign({},o,{started:true,over:false,
+    modo:"online",sala:Rede.sala(),rede:"ligado"});});
+  sync();
+  toast(souAnfitriao?"Você quebra":"Ele quebra","partida conectada","good");
+}
+
+/* ---------- src/12-ui.js ---------- */
 /* ══ UI ══ */
 function Bars(p){
   var a=p.an;
@@ -1696,43 +2377,99 @@ function Pips(p){
 function App(){
   var stt=React.useState({started:false,over:false,turn:"you",phase:"aim",group:null,shots:0,
     throwsLeft:3,live:[],sel:"taco",foeSel:"cadeira",toast:null,toastSub:"",toastKind:"good",
-    power:0,winner:null,hov:null,hx:0,hy:0});
+    power:0,charging:false,winner:null,hov:null,hx:0,hy:0,som:Som.ativo(),
+    tela:"menu",modo:"ia",sala:null,rede:"off",redeMsg:"",codigo:""});
   var s=stt[0],set=stt[1];
   React.useEffect(function(){setUI=set;},[]);
   React.useEffect(function(){
-    var id=setInterval(function(){if(G)set(function(o){return Object.assign({},o,{power:G.power});});},50);
+    var id=setInterval(function(){if(G)set(function(o){
+      return (o.power===G.power&&o.charging===!!G.charging)?o
+        :Object.assign({},o,{power:G.power,charging:!!G.charging});});},50);
     return function(){clearInterval(id);};},[]);
   function start(){
+    Som.iniciar();
     G=newGame();equip(OBJECTS[0]);equipFoe(OBJECTS[2]);
-    set(function(o){return Object.assign({},o,{started:true,over:false,turn:"you",phase:"aim",
+    G.modo="ia";
+    set(function(o){return Object.assign({},o,{started:true,over:false,modo:"ia",turn:"you",phase:"aim",
       group:null,shots:0,throwsLeft:3,sel:"taco",foeSel:"cadeira",winner:null,toast:null,
       live:[1,2,3,4,5,6,7,8,9,10,11,12,13,14]});});}
 
-  if(!s.started||s.over)
+  function redeStatus(e,extra){
+    set(function(o){return Object.assign({},o,{rede:e,
+      redeMsg:(e==="reconectando"?("tentativa "+extra):(typeof extra==="string"?extra:""))});});
+  }
+  function criarSala(){
+    set(function(o){return Object.assign({},o,{tela:"criar",rede:"abrindo"});});
+    var c=Rede.criar(function(){ iniciarOnline(Rede.semente(Rede.sala())); },redeStatus);
+    set(function(o){return Object.assign({},o,{sala:c});});
+  }
+  function entrarSala(){
+    /* lê do campo, não do estado: evita perder um clique dado antes do re-render */
+    var el=document.querySelector(".campo");
+    var c=(((el&&el.value)||s.codigo||"")+"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+    if(c.length<4){
+      set(function(o){return Object.assign({},o,{rede:"erro",redeMsg:"código curto"});});
+      return;}
+    set(function(o){return Object.assign({},o,{tela:"entrar",rede:"abrindo",codigo:c});});
+    Rede.entrar(c,null,redeStatus);
+  }
+  function voltar(){ Rede.sair();
+    set(function(o){return Object.assign({},o,{tela:"menu",rede:"off",redeMsg:"",sala:null});}); }
+
+  if(!s.started||s.over){
+    var rotulo={off:"",abrindo:"abrindo canal…",esperando:"aguardando o adversário",
+      conectando:"conectando…",ligado:"conectado",caiu:"conexão caiu",
+      reconectando:"reconectando",erro:"erro"}[s.rede]||s.rede;
+    var classe=s.rede==="ligado"?"ok":(s.rede==="erro"||s.rede==="caiu"?"mal":"esp");
     return h("div",{className:"ui"},h("div",{className:"veil"},h("div",{className:"vi"},
       s.over
         ? h(React.Fragment,null,
-            h("h1",null,s.winner==="you"?"Você limpou":h(React.Fragment,null,"O ",h("em",null,"Trapaceiro")," limpou")),
+            h("h1",null,s.winner==="you"?"Você limpou":h(React.Fragment,null,"O ",h("em",null,"outro")," limpou")),
             h("p",{className:"kick"},(s.group==="odd"?"você era ímpares":"você era pares")+" · "+s.shots+" tacadas"),
-            h("button",{className:"btn",onClick:start},"Revanche"))
-        : h(React.Fragment,null,
+            h("button",{className:"btn",onClick:function(){voltar();
+              set(function(o){return Object.assign({},o,{started:false,over:false,tela:"menu"});});}},"Voltar ao menu"))
+      : s.tela==="menu"
+        ? h(React.Fragment,null,
             h("h1",null,"Sinuca ",h("em",null,"Suja")),
             h("p",{className:"kick"},"Bar do fim da rua · pares ou ímpares"),
             h("p",null,"Todo objeto do bar vira taco. ",h("b",null,"Clique nele no cenário"),
-              " — o jogo analisa a geometria e ",h("u",null,"descobre sozinho qual ponta usar"),
-              ", e inclina o objeto o bastante para não raspar no pano.",h("br",null),h("br",null),
-              "A primeira bola que cair define seu grupo. Encaçape as sete e ganhou.",h("br",null),h("br",null),
-              "Tralha atravancando o seu jogo? ",h("u",null,"Clique nela para tirar do pano"),
-              " — mas isso custa a sua vez, e ela volta ao bar para ser jogada de novo depois.",
+              " — o jogo analisa a geometria e ",h("u",null,"descobre sozinho qual ponta usar"),"."),
+            h("div",{className:"menu"},
+              h("button",{className:"op pri",onClick:start},
+                h("b",null,"Contra o Trapaceiro"),
+                h("span",null,"Sozinho, contra a máquina. Começa na hora.")),
+              h("button",{className:"op",onClick:criarSala},
+                h("b",null,"Criar sala"),
+                h("span",null,"Gera um código para você mandar a um amigo.")),
+              h("button",{className:"op",onClick:function(){
+                  set(function(o){return Object.assign({},o,{tela:"entrar"});});}},
+                h("b",null,"Entrar em sala"),
+                h("span",null,"Já tem um código? Cole aqui e jogue."))))
+      : s.tela==="criar"
+        ? h(React.Fragment,null,
+            h("h1",null,"Sala ",h("em",null,"aberta")),
+            h("p",{className:"kick"},"Mande este código ao seu adversário"),
+            h("div",{className:"cod"},s.sala||"·····"),
+            h("p",null,"Ele abre o jogo, escolhe ",h("b",null,"Entrar em sala"),
+              " e digita esse código. A partida começa sozinha quando ele entrar.",
               h("br",null),h("br",null),
-              "Enquanto ",h("b",null,"o Trapaceiro")," mira, pegue qualquer tralha do bar, ",
-              h("u",null,"mire e arremesse na hora que quiser"),". Ele faz o mesmo com você.",
-              h("br",null),h("br",null),
-              "Seu Waldir está atrás do balcão e tem um bêbado bebendo ali. ",
-              h("u",null,"Acerte um deles e veja o que acontece"),".",h("br",null),h("br",null),
-              h("u",null,"Botão direito gira a câmera · roda dá zoom")),
-            h("button",{className:"btn",onClick:start},"Quebrar"))
+              h("u",null,"Você quebra.")," A conexão é direta entre os dois navegadores — não passa por servidor de jogo."),
+            h("p",{className:"stt "+classe},rotulo+(s.redeMsg?" · "+s.redeMsg:"")),
+            h("button",{className:"volta",onClick:voltar},"← cancelar"))
+      : h(React.Fragment,null,
+            h("h1",null,"Entrar na ",h("em",null,"sala")),
+            h("p",{className:"kick"},"Digite o código que o anfitrião te passou"),
+            h("input",{className:"campo",value:s.codigo,maxLength:5,autoFocus:true,
+              placeholder:"ABC12",
+              onChange:function(e){var v=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,"");
+                set(function(o){return Object.assign({},o,{codigo:v});});},
+              onKeyDown:function(e){if(e.key==="Enter")entrarSala();}}),
+            h("p",{className:"stt "+classe},rotulo+(s.redeMsg?" · "+s.redeMsg:"")),
+            h("button",{className:"btn",style:{marginTop:"16px"},onClick:entrarSala},"Entrar"),
+            h("br",null),
+            h("button",{className:"volta",onClick:voltar},"← voltar"))
     )));
+  }
 
   var throwing=(s.turn==="foe"&&(s.phase==="foe-pick"||s.phase==="foe-aim")&&s.throwsLeft>0);
   var msg=s.held
@@ -1740,13 +2477,20 @@ function App(){
     : (s.turn==="foe"
       ? (throwing?"Clique numa tralha do bar":"Trapaceiro jogando")
       : (s.phase==="roll"?"Bolas rolando"
-        :(s.power>0.02?("Força "+Math.round(s.power*100)+"% · solte para bater")
-        :"Pressione e puxe o taco para trás")));
+        :(s.power>=0.06?("Força "+Math.round(s.power*100)+"% · solte para bater")
+        :(s.charging?"Taco na origem · solte para cancelar"
+        :"Pressione e puxe o taco para trás"))));
   var cur=OBJECTS.filter(function(o){return o.id===s.sel;})[0]||OBJECTS[0];
   var foeO=OBJECTS.filter(function(o){return o.id===s.foeSel;})[0];
   var hovObj=s.hov&&s.hov.k==="cue"?OBJECTS.filter(function(o){return o.id===s.hov.id;})[0]:null;
 
   return h("div",{className:"ui"},
+    s.modo==="online"?h("div",{className:"conn"+(s.rede==="ligado"?"":" mal")},
+      h("i",null),(s.rede==="ligado"?("sala "+(s.sala||"")):
+        (s.rede==="reconectando"?"reconectando…":"conexão caiu"))):null,
+    h("button",{className:"som"+(s.som?"":" off"),title:s.som?"Som ligado":"Som desligado",
+      onClick:function(){Som.iniciar();set(function(o){return Object.assign({},o,{som:Som.alternar()});});}},
+      s.som?"\u266A":"\u2715"),
     h("div",{className:"top"},h("div",{className:"sb"},
       h("div",{className:"sd"+(s.turn==="you"?" on":"")},
         h("em",null,"Você"),
@@ -1791,8 +2535,6 @@ function App(){
 initScene();
 requestAnimationFrame(frame);
 ReactDOM.createRoot(document.getElementById("root")).render(h(App));
-})();
 </script>
-
 </body>
 </html>

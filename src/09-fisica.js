@@ -219,7 +219,7 @@ function foeAimCompute(){
 
 /* ══ TURNOS ══ */
 var setUI=null,mouse={x:0,y:0},sx=0,sy=0,prev=0,toastT=0;
-var DT_FIXO=1/120,acumul=0;
+var DT_FIXO=1/120,acumul=0,CANCELA=0.06;
 function ui(p){if(setUI)setUI(function(s){return Object.assign({},s,p);});}
 function toast(t,sub,k){toastT=1.7;ui({toast:t,toastSub:sub||"",toastKind:k||"good"});}
 function sync(){
@@ -275,7 +275,10 @@ function fecharJogada(){
     if(G.modo==="online"){G.phase="aguardando";}
     else{G.phase="foe-pick";G.anim=0.6;}
   }else{
-    if(again){G.phase="foe-pick";G.anim=0.55;sync();return;}
+    if(again){
+      if(G.modo==="online")G.phase="aguardando";
+      else{G.phase="foe-pick";G.anim=0.55;}
+      sync();return;}
     G.turn="you";G.phase="aim";
     if(G.held){G.held.state="idle";G.held.y=FLOOR+restY(G.held);G.held=null;}
     G.throwsLeft=Math.min(3,G.throwsLeft+1);

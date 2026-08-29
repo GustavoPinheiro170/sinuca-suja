@@ -1,6 +1,3 @@
-/* Sinuca Suja — Início de partida, equipar taco, posições
-   Sem bundler: carregado por <script> no index.html, na ordem definida lá. */
-
 /* ══ ESTADO ══ */
 function placeHome(o){
   var w=homeGroups[o.id],hm=o.home;
@@ -44,7 +41,7 @@ function newGame(){
       slots.push({x:(ci-(rows[ri]-1)/2)*d,z:z0-ri*d*0.866});
   slots.splice(12,1);
   var nums=[];for(var n=1;n<=14;n++)nums.push(n);
-  for(var s=nums.length-1;s>0;s--){var j=Math.floor(Math.random()*(s+1)),tp=nums[s];nums[s]=nums[j];nums[j]=tp;}
+  for(var s=nums.length-1;s>0;s--){var j=Math.floor(rnd()*(s+1)),tp=nums[s];nums[s]=nums[j];nums[j]=tp;}
   slots.forEach(function(sl,i){
     b.push({x:sl.x,z:sl.z,vx:0,vz:0,r:BR,cue:false,live:true,num:nums[i]});});
 
@@ -53,13 +50,13 @@ function newGame(){
   junkPool=[];
   for(var i=0;i<10;i++){
     var o2=spawnJunk(JUNK[i%JUNK.length]),sp=SPOTS[i%SPOTS.length];
-    o2.x=sp[0]+(Math.random()-0.5)*0.32;o2.z=sp[1]+(Math.random()-0.5)*0.32;
+    o2.x=sp[0]+(rnd()-0.5)*0.32;o2.z=sp[1]+(rnd()-0.5)*0.32;
     o2.home={x:o2.x,z:o2.z};
-    o2.q.setFromEuler(new THREE.Euler(0,Math.random()*TAU,0));
+    o2.q.setFromEuler(new THREE.Euler(0,rnd()*TAU,0));
     o2.y=FLOOR+restY(o2);o2.state="idle";
   }
   OBJECTS.forEach(placeHome);
   return {balls:b,turn:"you",phase:"aim",group:null,foeGroup:null,shots:0,power:0,charging:false,
     obj:OBJECTS[0],foeObj:OBJECTS[2],anim:0,over:false,potted:[],foul:false,
-    throwsLeft:3,foeAimDir:{x:0,z:-1},foeT:0,foePw:0.6,winner:null,foeThrew:false,held:null,aimT:null,aimLock:null,dragX:0,dragY:0};
+    throwsLeft:3,foeAimDir:{x:0,z:-1},foeT:0,foePw:0.6,winner:null,foeThrew:false,held:null,aimT:null,aimLock:null,dragX:0,dragY:0,modo:"ia"};
 }

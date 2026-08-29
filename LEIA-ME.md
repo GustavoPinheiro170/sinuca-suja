@@ -83,6 +83,26 @@ se saísse de um alto-falante ruim do outro lado do bar.
 pico, duração e espectro de cada efeito, já que navegador headless não gera áudio
 mensurável ao vivo.
 
+**Multiplayer** (`src/11-rede.js`): WebRTC por PeerJS, sem servidor de jogo. Como
+sinuca é por turnos e a simulação é determinística, não trafega estado — vai **uma
+mensagem por jogada** (direção, força, objeto). Os dois lados simulam igual.
+
+Para isso a aleatoriedade que afeta a física passou a usar `rnd()`, um mulberry32
+semeado pelo código da sala (o código vira a semente, então nem ela trafega). O que é
+visual — texturas, áudio, o neon piscando — segue em `Math.random`. A física roda em
+passo fixo de 1/120 s: com dt variável cada máquina daria um número diferente de
+integrações e as mesas divergiriam.
+
+Duas armadilhas que só apareceram medindo: um guarda em `receber()` deixava de equipar
+o taco do adversário quando era igual ao meu, e o convidado simulava a tacada com outro
+objeto — 9% de diferença na distância. E o loop de render escondia o taco quando os
+dois lados seguravam o mesmo objeto.
+
+Reconexão: cada lado guarda a sala em `localStorage` e tenta religar com espera
+crescente; ao voltar, o anfitrião manda um snapshot completo e o convidado aplica.
+
+`window.PEER_CFG` aponta para um servidor de sinalização próprio, se quiser um.
+
 **Física** (`src/09-fisica.js`): as bolas rolam em 2D no plano da mesa, colisão
 elástica de massas iguais, restituição 0,86 nas tabelas, atrito de 0,55 m/s². A tralha
 arremessada é corpo rígido simples em 3D; ao assentar, o código descobre qual eixo

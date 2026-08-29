@@ -1,6 +1,3 @@
-/* Sinuca Suja — Bolas, tralha, regras de pares/ímpares e IA
-   Sem bundler: carregado por <script> no index.html, na ordem definida lá. */
-
 /* ══ FÍSICA ══ */
 function stepBalls(dt){
   var B=G.balls,i,j;
@@ -65,8 +62,8 @@ function stepJunk(dt){
         if(ddx*ddx+ddz*ddz<0.085&&Math.abs(ddy)<0.44){
           o.state="rest";o.onTable=false;o.vx=o.vy=o.vz=0;o.av.set(0,0,0);
           o.y=FLOOR+restY(o);
-          o.x=np.root.position.x+(Math.random()-0.5)*0.5;
-          o.z=np.root.position.z+0.42+Math.random()*0.2;
+          o.x=np.root.position.x+(rnd()-0.5)*0.5;
+          o.z=np.root.position.z+0.42+rnd()*0.2;
           angerNPC(np,o);break;}}
       if(o.state!=="fly"){o.g.position.set(o.x,o.y,o.z);o.g.quaternion.copy(o.q);continue;}
       o.x+=o.vx*dt;o.z+=o.vz*dt;
@@ -82,7 +79,7 @@ function stepJunk(dt){
         if(Math.abs(o.vy)>(onT?1.05:0.60)){
           o.vy=-o.vy*soft;o.vx*=onT?0.16:0.50;o.vz*=onT?0.16:0.50;
           o.av.multiplyScalar(0.35);
-          o.av.x+=(Math.random()-0.5)*3.0;o.av.z+=(Math.random()-0.5)*3.0;
+          o.av.x+=(rnd()-0.5)*3.0;o.av.z+=(rnd()-0.5)*3.0;
         }else{
           o.vy=0;o.av.set(0,0,0);o.state="rest";o.onTable=onT;
           o.y=(onT?0:FLOOR)+restY(o);
@@ -114,7 +111,7 @@ function hurl(o,tx,ty,tz){
   var sol=solveThrow(o.x,sy,o.z,tx,ty,tz);
   o.state="fly";o.onTable=false;o.held=false;
   o.vx=sol.vx;o.vy=sol.vy;o.vz=sol.vz;
-  o.av.set((Math.random()-0.5)*15,(Math.random()-0.5)*15,(Math.random()-0.5)*15);
+  o.av.set((rnd()-0.5)*15,(rnd()-0.5)*15,(rnd()-0.5)*15);
   return true;
 }
 /* mira do arremesso: pessoa sob o cursor, senão o pano */
@@ -131,7 +128,7 @@ function throwAim(){
 function tableTarget(){
   var cue=G.balls[0];
   for(var k=0;k<90;k++){
-    var x=(Math.random()*2-1)*(HW-0.10),z=(Math.random()*2-1)*(HL-0.10),ok=true,i;
+    var x=(rnd()*2-1)*(HW-0.10),z=(rnd()*2-1)*(HL-0.10),ok=true,i;
     for(i=0;i<G.balls.length;i++){var b=G.balls[i];
       if(b.live&&Math.hypot(b.x-x,b.z-z)<0.13){ok=false;break;}}
     for(i=0;ok&&i<POCKETS.length;i++)
@@ -140,13 +137,13 @@ function tableTarget(){
       if(o.onTable&&Math.hypot(o.x-x,o.z-z)<0.17){ok=false;break;}}
     if(ok&&cue.live){var dd=Math.hypot(cue.x-x,cue.z-z);if(dd<0.15||dd>1.0)ok=false;}
     if(ok)return {x:x,z:z};}
-  return {x:(Math.random()*2-1)*HW*0.6,z:(Math.random()*2-1)*HL*0.6};
+  return {x:(rnd()*2-1)*HW*0.6,z:(rnd()*2-1)*HL*0.6};
 }
 function shoot(dir,power,who){
   var cue=G.balls[0];if(!cue.live)return;
   var an=(who==="you"?G.obj:G.foeObj).an;
   var dev=(1-an.precisao)*0.34*(0.35+0.65*power)*(1.45-an.controle);
-  var ang=Math.atan2(dir.z,dir.x)+(Math.random()-0.5)*2*dev;
+  var ang=Math.atan2(dir.z,dir.x)+(rnd()-0.5)*2*dev;
   var v=(0.30+0.70*power)*(2.1+an.potencia*4.6);
   cue.vx=Math.cos(ang)*v;cue.vz=Math.sin(ang)*v;
   Som.tacada(power,(who==="you"?G.obj:G.foeObj).id);
@@ -200,12 +197,13 @@ function foeAimCompute(){
       var clear=(f.tag==="ball"&&Math.hypot(f.x-gx,f.z-gz)<BR*2.6)?1:0.22;
       var sc=dot*clear*(1/(0.5+pl))*(1/(0.6+cl*0.4));
       if(!best||sc>best.sc)best={sc:sc,dx:dx,dz:dz,pw:Math.min(1,0.42+cl*0.26+pl*0.2)};}}
-  if(!best){var a=Math.random()*TAU;best={sc:0,dx:Math.cos(a),dz:Math.sin(a),pw:0.55};}
+  if(!best){var a=rnd()*TAU;best={sc:0,dx:Math.cos(a),dz:Math.sin(a),pw:0.55};}
   return best;
 }
 
 /* ══ TURNOS ══ */
 var setUI=null,mouse={x:0,y:0},sx=0,sy=0,prev=0,toastT=0;
+var DT_FIXO=1/120,acumul=0;
 function ui(p){if(setUI)setUI(function(s){return Object.assign({},s,p);});}
 function toast(t,sub,k){toastT=1.7;ui({toast:t,toastSub:sub||"",toastKind:k||"good"});}
 function sync(){
@@ -222,7 +220,7 @@ function respot(){
     for(i=0;!bad&&i<junkPool.length;i++){var o=junkPool[i];
       if(o.onTable&&Math.hypot(o.x-c.x,o.z-c.z)<o.r+BR*1.4){bad=true;break;}}
     if(!bad)return;
-    c.x=(Math.random()*2-1)*HW*0.72;c.z=HL*(0.25+Math.random()*0.42);}
+    c.x=(rnd()*2-1)*HW*0.72;c.z=HL*(0.25+rnd()*0.42);}
 }
 function endTurn(){
   G.balls.forEach(function(b){b.vx=0;b.vz=0;});
@@ -246,7 +244,9 @@ function endTurn(){
     else if(own&&!other)toast(own>1?own+" na caçapa":"Encaçapou","joga de novo","good");
     else if(other)toast("Bola do adversário","passou a vez","bad");
     if(again){G.phase="aim";sync();return;}
-    G.turn="foe";G.phase="foe-pick";G.anim=0.6;
+    G.turn="foe";
+    if(G.modo==="online"){G.phase="aguardando";}
+    else{G.phase="foe-pick";G.anim=0.6;}
   }else{
     if(again){G.phase="foe-pick";G.anim=0.55;sync();return;}
     G.turn="you";G.phase="aim";

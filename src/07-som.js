@@ -1,6 +1,3 @@
-/* Sinuca Suja — Áudio sintetizado: efeitos, ambiente e música
-   Sem bundler: carregado por <script> no index.html, na ordem definida lá. */
-
 /* ══ SOM ══ */
 /* Tudo sintetizado no Web Audio: nenhum arquivo de áudio no projeto.
    As receitas seguem a acústica real de cada material — bola de resina

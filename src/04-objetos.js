@@ -1,6 +1,3 @@
-/* Sinuca Suja — Objetos-taco, análise da ponta e tralha arremessável
-   Sem bundler: carregado por <script> no index.html, na ordem definida lá. */
-
 /* ══ OBJETOS-TACO ══ */
 /* `parts` alimenta a análise geométrica; `build` desenha. Mesmas dimensões. */
 var OBJECTS=[

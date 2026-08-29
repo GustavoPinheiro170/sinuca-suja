@@ -1,6 +1,3 @@
-/* Sinuca Suja — Materiais PBR
-   Sem bundler: carregado por <script> no index.html, na ordem definida lá. */
-
 /* ══ MATERIAIS ══ */
 var MAT={};
 function buildMaterials(env){

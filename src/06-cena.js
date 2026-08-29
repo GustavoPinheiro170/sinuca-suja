@@ -1,6 +1,3 @@
-/* Sinuca Suja — Bar, mesa, caçapas, luzes e câmera orbital
-   Sem bundler: carregado por <script> no index.html, na ordem definida lá. */
-
 /* ══ CENA ══ */
 var scene,cam,renderer,ray,plane,envMap;
 var ballMesh=[],homeGroups={},markers={},junkPool=[],pickables=[],G=null,hovered=null;

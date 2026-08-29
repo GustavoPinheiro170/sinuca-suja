@@ -1,6 +1,3 @@
-/* Sinuca Suja — Render loop, previsão de trajetória e entrada
-   Sem bundler: carregado por <script> no index.html, na ordem definida lá. */
-
 /* ══ LOOP ══ */
 function proj3(x,y,z){
   var v=new V3(x,y,z).project(cam);
@@ -45,7 +42,8 @@ function updateHover(){
   if(!G||G.over)return;
   var canCue=(G.phase==="aim");
   var canThrow=(G.turn==="foe"&&G.throwsLeft>0&&!G.held&&
-    (G.phase==="foe-pick"||G.phase==="foe-aim"||G.phase==="foe-hit"||G.phase==="roll"));
+    (G.phase==="foe-pick"||G.phase==="foe-aim"||G.phase==="foe-hit"||
+     G.phase==="aguardando"||G.phase==="roll"));
   var canRemove=(G.turn==="you"&&G.phase==="aim"&&!G.held);
   if(!canCue&&!canThrow&&!canRemove)return;
   ray.setFromCamera(new THREE.Vector2(mouse.x,mouse.y),cam);
@@ -68,12 +66,19 @@ function frame(ts){
   if(toastT>0){toastT-=dt;if(toastT<=0)ui({toast:null});}
   if(neonL)neonL.intensity=1.15+Math.sin(ts*0.011)*0.28+(Math.random()<0.02?-0.85:0);
 
+  /* Passo fixo: com dt variável cada máquina daria um número diferente de
+     integrações e as simulações divergiriam. Aqui as duas dão exatamente o
+     mesmo número de passos para o mesmo tempo simulado. */
+  acumul+=dt; if(acumul>0.25)acumul=0.25;
+  var nPassos=0;
+  while(acumul>=DT_FIXO&&nPassos<40){
+    if(G.phase==="roll")stepBalls(DT_FIXO);
+    stepJunk(DT_FIXO);
+    acumul-=DT_FIXO; nPassos++;
+  }
   if(G.phase==="roll"){
-    for(var s=0;s<5;s++)stepBalls(dt/5);
-    stepJunk(dt);
     if(!moving())endTurn();
   }else{
-    stepJunk(dt);
     if(G.phase==="foe-pick"){
       G.anim-=dt;
       if(G.anim<=0){
@@ -180,8 +185,10 @@ function frame(ts){
         }else defLine.visible=false;
       }else{objLine.visible=false;defLine.visible=false;objDot.visible=false;}
       poseCue(G.obj,d,0.055+G.power*0.40,true);}
-    homeGroups[G.foeObj.id].visible=(G.foeObj.id!==G.obj.id)?true:false;
-    if(G.foeObj.id!==G.obj.id&&!homeGroups[G.foeObj.id].userData.atHome)placeHome(G.foeObj);
+    if(G.foeObj.id!==G.obj.id){
+      if(!homeGroups[G.foeObj.id].userData.atHome)placeHome(G.foeObj);
+      homeGroups[G.foeObj.id].visible=true;
+    }
   }else if(G.phase==="foe-aim"||G.phase==="foe-hit"){
     var fd=G.foeAimDir,c2=G.balls[0];
     var wob=G.phase==="foe-aim"?Math.sin(G.foeT*3.0)*0.030:0;
@@ -223,8 +230,9 @@ addEventListener("pointerdown",function(e){
     setCursor();return;}
   if(!G||G.over)return;
   if(G.held){
-    var at=throwAim();
+    var at=throwAim(),jIdx=junkPool.indexOf(G.held);
     if(at&&hurl(G.held,at.x,at.y,at.z)){
+      if(G.modo==="online")Rede.enviar({t:"arremesso",j:jIdx,x:at.x,z:at.z});
       G.throwsLeft--;
       toast(at.npc?"Mirou em gente":"Arremessou",
         at.npc?"isso não vai acabar bem":G.throwsLeft+" restantes",at.npc?"bad":"cold");
@@ -234,14 +242,17 @@ addEventListener("pointerdown",function(e){
   if(hovered){
     if(hovered.kind==="cue"){
       var o=OBJECTS.filter(function(x){return x.id===hovered.id;})[0];
-      equip(o);Som.pegar();toast("Pegou",o.nome.toLowerCase(),"good");sync();
+      equip(o);Som.pegar();
+      if(G.modo==="online")Rede.enviar({t:"taco",obj:o.id});
+      toast("Pegou",o.nome.toLowerCase(),"good");sync();
     }else if(hovered.kind==="rm"){
       var ro=hovered.obj;
       ro.state="idle";ro.onTable=false;ro.vx=0;ro.vz=0;ro.av.set(0,0,0);
       ro.x=ro.home.x;ro.z=ro.home.z;
-      ro.q.setFromEuler(new THREE.Euler(0,Math.random()*TAU,0));
+      ro.q.setFromEuler(new THREE.Euler(0,rnd()*TAU,0));
       ro.y=FLOOR+restY(ro);
       ro.g.position.set(ro.x,ro.y,ro.z);ro.g.quaternion.copy(ro.q);
+      if(G.modo==="online")Rede.enviar({t:"retirar",j:junkPool.indexOf(ro)});
       toast("Tirou "+ro.t.nome.toLowerCase()+" da mesa","custou a sua vez","bad");
       G.turn="foe";G.phase="foe-pick";G.anim=0.9;sync();
     }else if(hovered.kind==="junk"&&G.throwsLeft>0&&!G.held){
@@ -289,7 +300,9 @@ function endPtr(e){
   var d=G.aimLock||aimDir();
   if(d&&G.phase==="aim"){
     if(G.power<0.045)toast("Tacada cancelada","puxe o taco para trás para dar força","cold");
-    else shoot(d,G.power,"you");}
+    else{
+      if(G.modo==="online")Rede.enviar({t:"tacada",dx:d.x,dz:d.z,p:G.power,obj:G.obj.id});
+      shoot(d,G.power,"you");}}
   G.power=0;G.aimLock=null;
 }
 addEventListener("pointerup",endPtr);

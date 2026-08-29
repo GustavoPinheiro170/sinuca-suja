@@ -1,6 +1,3 @@
-/* Sinuca Suja — Atendente e bêbado: modelo, animação e raiva
-   Sem bundler: carregado por <script> no index.html, na ordem definida lá. */
-
 /* ══ GENTE ══ */
 var NPCS=[],npcMeshes=[];
 function limb(len,r0,r1,mt){
@@ -91,7 +88,7 @@ function animateNPCs(dt){
       n.back.t-=dt;
       if(n.back.t<=0){
         var c=G&&G.balls[0].live?G.balls[0]:{x:0,z:0};
-        var a=Math.random()*TAU;
+        var a=rnd()*TAU;
         hurl(n.back.obj,Math.max(-HW+0.09,Math.min(HW-0.09,c.x+Math.cos(a)*0.17)),0.075,
                         Math.max(-HL+0.09,Math.min(HL-0.09,c.z+Math.sin(a)*0.17)));
         toast("Ele devolveu","bem na sua linha","bad");
